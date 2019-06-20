@@ -1,0 +1,238 @@
+<div class="page-title">
+    <div class="page-breadcrumb">
+        <ol class="breadcrumb">
+            <li><a href="<?=weburl('home','index')?>">首页</a></li>
+            <li class="active">众筹列表</li>
+        </ol>
+    </div>
+</div>
+<div id="main-wrapper">
+    <div class="row">
+        <div class="panel panel-dark">
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <div class="dataTables_wrapper project-stats">
+                        <div class="input-group m-b-sm col-md-6 col-md-offset-6">
+                            <input type="text" id="search-key" placeholder="<?=@$key?>" class="form-control">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" id="search-btn">查找</button>
+                            </span>
+                        </div>
+                        <table id="crowdtable" class="display table" style="width: 100%;" role="grid">
+                            <thead>
+                            <tr role="row">
+                                <th rowspan="1" colspan="1" style="width: 80px;">#</th>
+                                <th rowspan="1" colspan="1" style="width: 80px;">类型</th>
+                                <th rowspan="1" colspan="1" style="width: 80px;">发起人</th>
+                                <th rowspan="1" colspan="1" style="min-width: 200px">标题</th>
+                                <th rowspan="1" colspan="1" style="min-width: 100px">已筹/预筹(元)</th>
+                                <th rowspan="1" colspan="1" style="width: 140px">开始/结束</th>
+                                <th rowspan="1" colspan="1" style="width: 65px;">状态</th>
+                                <th rowspan="1" colspan="1" style="width: 180px;">进度</th>
+                                <th rowspan="1" colspan="1" style="width: 160px;">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php if(is_array($crowd)):foreach($crowd as $c):?>
+                            <tr role="row">
+                                <th rowspan="1" colspan="1"><?=$c['id']?></th>
+                                <td rowspan="1" colspan="1"><?=$c['ntype']=='0'?'普通':'联合'?></td>
+                                <td rowspan="1" colspan="1"><?=$c['u_id']==0?'官方':$c['realname']?></td>
+                                <td rowspan="1" colspan="1"><a onClick="javascript:window.open('<?=appurl('crowd','detail','id='.$c['id'])?>','','width=344,height=618,left=10, top=10,toolbar=no, status=no, menubar=no, resizable=yes, scrollbars=yes');return false;"  href="javascript:;">【<?=$c['cname']?>】<?=$c['title']?></a></td>
+                                <td rowspan="1" colspan="1"><?=$c['cjmoney']?>/<?=$c['money']?></td>
+                                <td rowspan="1" colspan="1"><?=date('Y-m-d H:i',$c['starttime'])?><br/><?=date('Y-m-d H:i',$c['endtime'])?></td>
+                                <td rowspan="1" colspan="1">
+                                <?php if($c['status']=='1'):
+                                      if($c['starttime']<=time() && $c['endtime']>=time()):?>
+                                    <span class="label label-danger">进行中</span>
+                                    <?php elseif($c['starttime']>time()):?>
+                                    <span class="label label-warning">未开始</span>
+                                    <?php elseif($c['endtime']<time()):?>
+                                    <span >已结束</span>
+                                    <?php endif?>
+                                    <?php elseif($c['status']=='0'):?>
+                                    <span class="label label-primary">已下线</span>
+                                    <?php elseif($c['status']=='-1'):?>
+                                    <span class="label label-info">已关闭</span>
+                                    <?php elseif($c['status']=='2'):?>
+                                    <span class="label label-info">已结算</span>
+                                    <?php endif?>
+                                </td>
+                                <td>
+                                        <?php if($c['ntype']=='0'):?>
+                                    <div class="progress">
+                                        <?php $pronum=ceil($c['cjmoney']/($c['money']==0?1:$c['money'])*100)?>
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="<?=$pronum?>" aria-valuemin="0" aria-valuemax="100" style="width: <?=$pronum?>%"><?=$pronum?>%</div>
+                                    </div>
+                                        <?php else:?>
+                                    <a href="<?=weburl('crowd','bmlist','crowd_id='.$c['id'])?>">查看报名列表</a>
+                                    <?php endif?>
+
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-primary btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">管理<span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a href="<?=weburl('crowd','stat','crowd_id='.$c['id'])?>">项目统计</a></li>
+                                            <li><a href="<?=weburl('crowd','march','crowd_id='.$c['id'])?>">进展管理</a></li>
+                                            <?php if($c['ntype']=='0'):?>
+                                            <li><a href="<?=weburl('crowd','reportlist','id='.$c['id'])?>">支持列表</a></li>
+                                            <li><a href="<?=weburl('crowd','rewardlist','id='.$c['id'])?>">回报处理</a></li>
+                                            <?php else:?>
+                                            <li><a href="<?=weburl('crowd','bmlist','crowd_id='.$c['id'])?>">报名列表</a></li>
+                                            <?php if($c['team']>0):?>
+                                            <li><a href="<?=weburl('crowd','team','crowd_id='.$c['id'])?>">队伍管理</a></li>
+                                            <?php endif;?>
+                                            <?php endif;?>
+                                            <li><a href="<?=weburl('comment','index','vfrom=crowd&from_id='.$c['id'])?>">留言管理</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-danger btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">操作<span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a href="<?=weburl('crowd','start','type='.$c['ntype'].'&ff=1&id='.$c['id'])?>">编辑</a></li>
+                                            <li class="divider"></li>
+                                            <li  class="crowd-end-btn" data-id="<?=$c['id']?>" data-m="<?=$c['cjmoney']?>"><a href="javascript:;">项目结算</a></li>
+                                            <li><a href="javascript:;" class="auto-refund" data-id="<?=$c['id']?>">自动退款</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach;endif?>
+                            </tbody>
+                        </table>
+                        <?=paginations($pagination)?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- Main Wrapper -->
+<div class="modal fade crowd-end-md" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">众筹项目结算</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-5 control-label">手续费</label>
+                        <div class="col-sm-7">
+                            <div class="input-group m-b-sm">
+                                <input type="text" class="form-control" name="scval" placeholder="手续费">
+                                <input type="hidden" name="crowd_id" value="">
+                                <input type="hidden" name="cjmoney" value="0">
+                                <span class="input-group-addon" id="basic-addon2">%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-5 control-label">结算金额 ￥</label>
+                        <div class="col-sm-7">
+                            <div class="input-group m-b-sm">
+                                <input type="text" class="form-control" name="endmoney" placeholder="结算金额">
+                                <span class="input-group-addon">元</span>
+                            </div>
+
+                        </div>
+                    </div>
+                    <p>请确保结算金额正确，此处的结算金额为众筹项目的最终结算金额，目前系统不支持线上结算，请完成后进行线下结算。</p>
+                    <p>在此处结算之后，众筹项目将下线并结束。</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-success end-crowd-sub">确认结算</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade bs-refund-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="mySmallModalLabel">操作提示</h4>
+            </div>
+            <div class="modal-body">
+                <p>此操作将自动退款所有参与用户（操作时间依数据量而定），请谨慎操作。</p>
+                <p>普通众筹：此操作将退款所有支持者，并通知用户。</p>
+                <p>联合众筹：此操作将退款所有筹款失败的报名者名下的支持者，并通知支持报名者的用户。</p>
+                <p class="text-danger">注意：此操作必须开启自动任务，否则将无法执行！</p>
+                <p class="text-danger">警告：此操作不可逆，提交后将无法回退，如少量数据，建议使用手动单个退款！</p>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-success sub-refund-task">确认操作</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var page_url='<?=weburl('crowd','clist')?>';
+    $(function(){
+        $('#search-btn').on('click',function(){
+            var keys=$('#search-key').val();
+            if(keys!=''){
+                location.href=page_url+'&key='+keys;
+            }
+        });
+        $('.crowd-end-btn').on('click',function(){
+            $('input[name=cjmoney]').val('');
+            $('input[name=crowd_id]').val('');
+            $('input[name=scval]').val('');
+            $('input[name=endmoney]').val('');
+            var crowd_id=$(this).data('id');
+            $('input[name=cjmoney]').val($(this).data('m'));
+            $('input[name=crowd_id]').val(crowd_id);
+            $('.crowd-end-md').modal('show');
+        });
+        $('input[name=scval]').on('change',function () {
+            var endmoney=$('input[name=cjmoney]').val();
+            var scval=$('input[name=scval]').val()/100;
+            $('input[name=endmoney]').val((endmoney-endmoney*scval).toFixed(2));
+        })
+        $('.end-crowd-sub').on('click',function () {
+            var sdata={};
+            sdata.endmoney=$('input[name=endmoney]').val();
+            sdata.crowd_id=$('input[name=crowd_id]').val();
+            if(sdata.endmoney=='' || sdata.endmoney<=0){
+                toastr["error"]("结算金额不合法");
+                return;
+            }
+            if(sdata.crowd_id=='' || sdata.crowd_id<=0){
+                toastr["error"]("异常操作，被阻止");
+                return;
+            }
+            $.post("<?=weburl('crowd','close')?>",sdata,function (d) {
+                if(d.id==1){
+                    toastr["success"](d.msg);
+                    setTimeout(function () {
+                        location.reload();
+                    },1000)
+                }else{
+                    toastr["error"](d.msg);
+                }
+            },'json')
+        });
+        $('.auto-refund').on('click',function () {
+            $('.sub-refund-task').data('id',$(this).data('id'));
+            $('.bs-refund-modal-sm').modal('show');
+        });
+        $('.sub-refund-task').on('click',function () {
+            $('.bs-refund-modal-sm').modal('hide');
+            $.getJSON("<?=weburl('crowd','refundtask')?>",{id:$(this).data('id')},function (d) {
+                if(d.id==1){
+                    toastr["success"](d.msg);
+                }else{
+                    toastr["error"](d.msg);
+                }
+            });
+        })
+    })
+</script>

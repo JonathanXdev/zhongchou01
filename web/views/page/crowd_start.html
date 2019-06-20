@@ -1,0 +1,601 @@
+
+<div class="page-title">
+    <div class="page-breadcrumb">
+        <ol class="breadcrumb">
+            <li><a href="<?=weburl('home','index')?>">首页</a></li>
+            <li class="active"><?=@empty($crowd)?'发起众筹':'修改众筹['.$crowd['title'].']'?></li>
+        </ol>
+    </div>
+</div>
+<div id="main-wrapper">
+    <div class="row">
+        <div class="panel panel-dark">
+            <div class="panel-heading clearfix">
+                <div class="panel-control btn-group panel" role="group" aria-label="Justified button group">
+                    <a href="<?=weburl('crowd','start',array('type'=>0,'ff'=>1))?>" class="btn <?=$ntype=='0'?'btn-primary':'btn-default'?>" role="button">普通众筹</a>
+                    <a href="<?=weburl('crowd','start',array('type'=>1,'ff'=>1))?>" class="btn <?=$ntype=='1'?'btn-primary':'btn-default'?>" role="button">联合众筹</a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div id="accordion" role="tablist" aria-multiselectable="true">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    基本信息
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne" aria-expanded="true">
+                            <div class="panel-body">
+                                <form class="form-horizontal" id="subcrowd-founder" action="<?=weburl('crowd','subfounder')?>" method="post">
+                                    <input type="hidden" name="id" value="<?=@$crowd['id']?>">
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">项目类型</label>
+                                        <div class="col-sm-5">
+                                            <select class="form-control m-b-sm" name="cid">
+                                                <?php if(is_array($category)):foreach($category as $ct):?>
+                                                <option value="<?=$ct['id']?>" <?=$ct['id']==@$crowd['cid']?'selected':''?>><?=$ct['name']?></option>
+                                                <?php endforeach;endif?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">发起人身份</label>
+                                        <div class="col-sm-5">
+                                            <select class="form-control m-b-sm" name="nfrom">
+                                                <option value="0" <?='0'==@$crowd['nfrom']?'selected':''?>>官方</option>
+                                                <option value="1" <?='1'==@$crowd['nfrom']?'selected':''?>>个人</option>
+                                                <option value="2" <?='2'==@$crowd['nfrom']?'selected':''?>>企业/机构</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">区域</label>
+                                        <div class="col-sm-8">
+                                            <?php if(@$crowd['city']!=''){
+                                                $ctarr=str_split($crowd['city'], 2);
+                                            }?>
+                                            <input type="hidden" name="city" value="<?=@$crowd['city']?>">
+                                                <div class="col-md-4">
+                                            <select class="form-control m-b-sm a1-sls" data-val="<?=@$ctarr[0]!=''?$ctarr[0].'0000':''?>">
+                                            </select>
+                                                </div>
+                                            <div class="col-md-4">
+                                                <select class="form-control m-b-sm a2-sls" data-val="<?=@$ctarr[0].@$ctarr[1].'00'==0?'':$ctarr[0].$ctarr[1].'00'?>">
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <select class="form-control m-b-sm a3-sls" data-val="<?=@$ctarr[0].@$ctarr[1].@$ctarr[2]==0?'':$ctarr[0].$ctarr[1].$ctarr[2]?>">
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <table class="table table-bordered" id="auth-box">
+                                            <thead>
+                                            <tr>
+                                                <th>资质名</th>
+                                                <th>资质图片</th>
+                                                <th>状态</th>
+                                                <th>操作</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <?php
+                                            $autharr=json_decode(@$crowd['auth'],true);
+                                            if(is_array(@$autharr)):foreach($autharr as $knum=>$auth):
+                                            if($auth['status']=='0'){
+                                                $statustitle='未核验';
+                                            }else if($auth['status']=='1'){
+                                                $statustitle='已核验';
+                                            }
+                                            ?>
+                                            <tr id="auth-1000<?=$knum?>">
+                                                <td><?=$auth['name']?><input type="hidden" name="authname[]" class="authname" value="<?=$auth['name']?>"></td>
+                                                <td><img src="<?=$w['attachurl'].$auth['img']?>" width="80"><input type="hidden" name="authimg[]" class="authimg" value="<?=$auth['img']?>"></td>
+                                                <td><?=$statustitle?><input type="hidden" name="authstatus[]" value="<?=$auth['status']?>" class="authstatus"></td>
+                                                <td>
+                                                    <div class="btn-group" role="group" aria-label="Justified button group">
+                                                        <a href="#" class="btn btn-info edit_auth" role="button" data-id="1000<?=$knum?>" onclick="showauthmodal(1000<?=$knum?>)">编辑</a>
+                                                        <a href="#" class="btn btn-primary del_auth" role="button" data-id="'+authnum+'" onclick="delauth(1000<?=$knum?>)">移除</a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach;endif?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-2 col-md-offset-10">
+                                            <button type="button" class="btn addauthbtn">增加资质证明</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <?php if($ntype=='0'):?>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingTwo">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    项目信息
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo" aria-expanded="false" style="height: 0px;">
+                            <div class="panel-body">
+                                <form class="form-horizontal" id="subcrowd-baseinfo" action="<?=weburl('crowd','subedit')?>" method="post">
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">众筹封面</label>
+                                        <div class="col-sm-5">
+                                            <div class="mui-input-cell">
+                                                <?=tpl_form_field_multi_image('coverimg',json_decode(@$crowd['coverimg'],true),array('dest_dir' => 'yh_zhongchou/crowd'));?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">标题</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" aria-required="true" class="form-control" name="title" value="<?=@$crowd['title']?>">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">筹集金额</label>
+                                        <div class="col-sm-10">
+                                            <div class="input-group m-b-sm">
+                                                <span class="input-group-addon">￥</span>
+                                                <input type="number" name="money" value="<?=@$crowd['money']?>" class="form-control">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">筹款模式</label>
+                                        <div class="col-sm-10">
+                                            <select class="form-control m-b-sm" name="cjtype">
+                                                <option value="0" <?='0'==@$crowd['cjtype']?'selected':''?>>筹满后停止</option>
+                                                <option value="1" <?='1'==@$crowd['cjtype']?'selected':''?>>筹满后继续</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">支持金额</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" value="<?=@$crowd['gear']==''?'1,3,5,10':@$crowd['gear']?>" name="gear" data-role="tagsinput" class="form-control">
+                                            <p>此处为无偿支持的挡位，请敲回车或英文逗号分割</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">筹款目的</label>
+                                        <div class="col-sm-10">
+                                            <textarea class="form-control" name="summary"><?=@$crowd['summary']?></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">开始日期</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control date-picker" name="starttime" value="<?=@$crowd['starttime']==''?date('Y-m-d H:i'):date('Y-m-d H:i',@$crowd['starttime'])?>">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">结束日期</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control date-picker" name="endtime" value="<?=@$crowd['endtime']==''?date('Y-m-d H:i'):date('Y-m-d H:i',@$crowd['endtime'])?>">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">自定义标签</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" name="tags" value="<?=@$crowd['tags']?>" data-role="tagsinput" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">状态</label>
+                                        <div class="col-sm-10">
+                                            <select class="form-control m-b-sm" name="status">
+                                                <option value="0" <?=@$crowd['status']=='0'?'selected':''?>>下线</option>
+                                                <option value="1" <?=@$crowd['status']=='1'?'selected':''?>>上线</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingThree">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    详细描述
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree" aria-expanded="false" style="height: 0px;">
+
+                                <form class="form-horizontal" id="subcrowd-content" action="<?=weburl('crowd','subrewards')?>" method="post">
+                                        <?=tpl_ueditor('content',@$crowd['content'],array(
+                                'dest_dir'=>'yh_zhongchou/content',
+                                    'global'=>false,
+                                    'class_extra'=>'',
+                                    'direct'=>true,
+                                    'multiple'=>false,
+                                    'filesizelimit'=>5120000,
+                                    'maximumWords'=>10000
+                                        ));?>
+                                </form>
+
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingfour">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapsefour" aria-expanded="false" aria-controls="collapsefour">
+                                    回报设置
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapsefour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingfour" aria-expanded="false" style="height: 0px;">
+                            <div class="panel-body">
+                                <form class="form-horizontal" id="subcrowd-rewards" action="<?=weburl('crowd','subrewards')?>" method="post">
+                                    <?php
+                                    $rewardnum=0;
+                                    if(is_array(@$rewards)):foreach($rewards as $r):
+                                    $rewardnum++;
+?>
+                                    <div class="panel panel-purple rewardbox" id="reward_<?=$rewardnum?>">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">回报<?=$rewardnum?></h3>
+                                            <div class="panel-control">
+                                                <a href="javascript:void(0);" data-id="<?=$rewardnum?>" data-rewardid="<?=$r['id']?>" data-toggle="tooltip" data-placement="top" class="panel-remove" data-original-title="移除"><i class="icon-close"></i></a>
+                                            </div>
+                                        </div>
+                                        <div class="panel-body reward_p_box">
+                                            <input name="reward_id[<?=$rewardnum?>]" type="hidden" value="<?=$r['id']?>">
+                                            <div class="form-group">
+                                                <label class="col-sm-2 control-label">回报类型</label>
+                                                <div class="col-sm-10">
+                                                    <select name="reward_type[<?=$rewardnum?>]" class="form-control">
+                                                        <option value="0" <?=$r['reward_type']=='0'?'selected':''?>>实物回报</option>
+                                                        <option value="1" <?=$r['reward_type']=='1'?'selected':''?>>虚拟回报</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-2 control-label">支持金额</label>
+                                                <div class="col-sm-10">
+                                                    <div class="input-group m-b-sm">
+                                                        <span class="input-group-addon">￥</span>
+                                                        <input name="reward_money[<?=$rewardnum?>]" type="number" class="form-control" value="<?=$r['reward_money']?>">
+                                                        <span class="input-group-addon">.00</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-2 control-label">回报标题</label>
+                                                <div class="col-sm-10">
+                                                    <input type="text" name="reward_title[<?=$rewardnum?>]" class="form-control" value="<?=$r['reward_title']?>">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-2 control-label">回报内容</label>
+                                                <div class="col-sm-10">
+                                                    <textarea class="form-control" name="reward_content[<?=$rewardnum?>]"><?=$r['reward_content']?></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-2 control-label">回报总数</label>
+                                                <div class="col-sm-10">
+                                                    <input type="text" class="form-control" name="reward_limit[<?=$rewardnum?>]" value="<?=$r['reward_limit']?>">
+                                                    <p class="help-block">“0”为不限名额</p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-2 control-label">支持数/人</label>
+                                                <div class="col-sm-10">
+                                                    <input type="text" class="form-control" name="reward_marknum[<?=$rewardnum?>]" value="<?=$r['reward_marknum']?>">
+                                                    <p class="help-block">0或1为限支持1次，n为n次</p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-2 control-label">回报时间</label>
+                                                <div class="col-sm-10">
+                                                    <input type="text" class="form-control" name="reward_day[<?=$rewardnum?>]" value="<?=$r['reward_day']?>">
+                                                    <p class="help-block">“0”为项目结束后立即发送,大于0则表示项目完成后多少天发送</p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-2 control-label">自定义字段</label>
+                                                <div class="col-sm-10">
+                                                    <div class="fd_box">
+                                            <?php $fdnum=1; if(@$r['reward_fd']!=''):
+                                            $fdarr=unserialize($r['reward_fd']);?>
+                                                        <?php foreach($fdarr as $fr):?>
+                                                        <div class="fd_b_<?=$fdnum?> row">
+                                                            <div class="col-sm-6">
+                                                                <input type="text" class="form-control" name="reward_fd[<?=$rewardnum?>][]" value="<?=$fr?>">
+                                                            </div>
+                                                            <div class="col-sm-3">
+                                                            <button type="button" class="btn btn-danger btn-addon m-b-sm remove_fd" data-id="<?=$fdnum?>" data-rid="<?=$rewardnum?>"><i class="fa fa-remove"></i> 移除</button>
+                                                            </div>
+                                                        </div>
+                                                        <?php $fdnum++;endforeach;?>
+                                                    <p class="help-block">用户支持该回报时需要填写的字段，实物回报默认使用用户收货地址。</p>
+                                            <?php endif;?>
+                                                    </div>
+                                                    <button type="button" class="btn btn-default btn-addon m-b-sm add_fd" data-id="<?=$rewardnum?>"><i class="fa fa-plus"></i> 增加字段</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?php endforeach;endif;?>
+                                </form>
+                                <button type="button" class="btn btn-primary m-b-sm btn-sm addrewardbox"><i class="fa fa-plus"></i> 增加回报项</button>
+                            </div>
+                        </div>
+                    </div>
+                    <?php else: //联合众筹相关?>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingTwo">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    项目信息
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo" aria-expanded="false" style="height: 0px;">
+                            <div class="panel-body">
+                                <form class="form-horizontal" id="subcrowd-baseinfo" action="<?=weburl('crowd','subedit')?>" method="post">
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">众筹封面</label>
+                                        <div class="col-sm-5">
+                                            <div class="mui-input-cell">
+                                                <?=tpl_form_field_multi_image('coverimg',json_decode(@$crowd['coverimg'],true),array('dest_dir' => 'yh_zhongchou/crowd'));?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">标题</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" aria-required="true" class="form-control" name="title" value="<?=@$crowd['title']?>">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">筹集金额</label>
+                                        <div class="col-sm-10">
+                                            <div class="input-group m-b-sm">
+                                                <span class="input-group-addon">￥</span>
+                                                <input type="number" name="money" class="form-control" value="<?=@$crowd['money']?>">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">支持金额</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" value="<?=@$crowd['gear']==''?'1,3,5,10':@$crowd['gear']?>" name="gear" data-role="tagsinput" class="form-control">
+                                            <p>此处为无偿支持的挡位，请敲回车或英文逗号分割</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="input-help-block" class="col-sm-2 control-label">允许报名人数</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" name="bmlimit" value="<?=@$crowd['bmlimit']==''?0:@$crowd['bmlimit']?>" class="form-control" id="input-help-block">
+                                            <p class="help-block">“0”为不限制报名人数</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">报名审核</label>
+                                        <div class="col-sm-10">
+                                            <select class="form-control m-b-sm" name="bmstatus">
+                                                <option value="0" <?=@$crowd['bmstatus']=='0'?'selected':''?>>直接通过</option>
+                                                <option value="1" <?=@$crowd['bmstatus']=='1'?'selected':''?>>需审核</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">筹款目的</label>
+                                        <div class="col-sm-10">
+                                            <textarea class="form-control" name="summary"><?=@$crowd['summary']?></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">开始日期</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control date-picker" name="starttime" value="<?=@$crowd['starttime']==''?date('Y-m-d H:i'):date('Y-m-d H:i',@$crowd['starttime'])?>">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">结束日期</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control date-picker" name="endtime" value="<?=@$crowd['endtime']==''?date('Y-m-d H:i'):date('Y-m-d H:i',@$crowd['endtime'])?>">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">自定义标签</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" name="tags" value="<?=@$crowd['tags']?>" data-role="tagsinput" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">状态</label>
+                                        <div class="col-sm-10">
+                                            <select class="form-control m-b-sm" name="status">
+                                                <option value="0" <?=@$crowd['status']=='0'?'selected':''?>>下线</option>
+                                                <option value="1" <?=@$crowd['status']=='1'?'selected':''?>>上线</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">队伍模式</label>
+                                        <div class="col-sm-10">
+                                            <select class="form-control m-b-sm" name="team">
+                                                <option value="0" <?=@$crowd['team']=='0'?'selected':''?>>关闭</option>
+                                                <option value="1" <?=@$crowd['team']=='1'?'selected':''?>>只允许平台创建</option>
+                                                <option value="2" <?=@$crowd['team']=='2'?'selected':''?>>允许用户创建</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingThree">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    详细描述
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree" aria-expanded="false" style="height: 0px;">
+                            <form class="form-horizontal" id="subcrowd-content" action="<?=weburl('crowd','subrewards')?>" method="post">
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                        <?=tpl_ueditor('content',@$crowd['content'],array(
+                                        'dest_dir'=>'yh_zhongchou/content',
+                                        'global'=>false,
+                                        'class_extra'=>'',
+                                        'direct'=>true,
+                                        'multiple'=>false,
+                                        'fileSizeLimit'=>5120000,
+                                        'maximumwords'=>10000
+                                        ));?>
+                                </div>
+                            </div>
+                            </form>
+                        </div>
+                    </div>
+                    <?php endif?>
+                </div>
+                <button type="button" data-ntype="<?=$ntype?>" class="btn btn-success btn-lg" style="float:right" id="sub-crowd-all"><?=@empty($crowd)?'提交众筹':'修改众筹信息'?></button>
+            </div>
+        </div>
+     </div>
+</div>
+<script>
+    function rewardhtml(num){
+        var rewardhtml='<div class="panel-purple rewardbox" id="reward_'+num+'">'
+            +'<div class="panel-heading">'
+            +'<h3 class="panel-title">回报'+num+'</h3>'
+            +'<div class="panel-control">'
+            +'<a href="javascript:void(0);" data-id="'+num+'" data-toggle="tooltip" data-placement="top" class="panel-remove" data-original-title="Remove"><i class="icon-close"></i></a>'
+            +'</div>'
+            +'</div>'
+            +'<div class="panel-body reward_p_box">'
+            +'<div class="form-group">'
+            +'<label class="col-sm-2 control-label">回报类型</label>'
+            +'<div class="col-sm-10">'
+            +'<select name="reward_type['+num+']" class="form-control">'
+            +'<option value="0">实物回报</option>'
+            +'<option value="1">虚拟回报</option>'
+            +'</select>'
+            +'</div>'
+            +'</div>'
+            +'<div class="form-group">'
+            +'<label class="col-sm-2 control-label">支持金额</label>'
+            +'<div class="col-sm-10">'
+            +'<div class="input-group m-b-sm">'
+            +'<span class="input-group-addon">￥</span>'
+            +'<input type="text" class="form-control" name="reward_money['+num+']">'
+            +'<span class="input-group-addon">.00</span>'
+            +'</div>'
+            +'</div>'
+            +'</div>'
+            +'<div class="form-group">'
+            +'<label class="col-sm-2 control-label">回报标题</label>'
+            +'<div class="col-sm-10">'
+            +'<input type="text" class="form-control" name="reward_title['+num+']">'
+            +'</div>'
+            +'</div>'
+            +'<div class="form-group">'
+            +'<label class="col-sm-2 control-label">回报内容</label>'
+            +'<div class="col-sm-10">'
+            +'<textarea class="form-control" name="reward_content['+num+']"></textarea>'
+            +'</div>'
+            +'</div>'
+            +'<div class="form-group">'
+            +'<label class="col-sm-2 control-label">回报总数</label>'
+            +'<div class="col-sm-10">'
+            +'<input type="text" class="form-control" name="reward_limit['+num+']">'
+            +'<p class="help-block">“0”为不限名额</p>'
+            +'</div>'
+            +'</div>'
+            +'<div class="form-group">'
+            +'<label class="col-sm-2 control-label">支持数/人</label>'
+            +'<div class="col-sm-10">'
+            +'<input type="text" class="form-control" name="reward_marknum['+num+']" value="">'
+            +'<p class="help-block">0或1为限支持1次，n为n次</p>'
+            +'</div>'
+            +'</div>'
+            +'<div class="form-group">'
+            +'<label class="col-sm-2 control-label">回报时间</label>'
+            +'<div class="col-sm-10">'
+            +'<input type="text" class="form-control" name="reward_day['+num+']">'
+            +'<p class="help-block">“0”为项目结束后立即发送</p>'
+            +'</div>'
+            +'</div>'
+            +'<div class="form-group">'
+            +'<label class="col-sm-2 control-label">自定义字段</label>'
+            +'<div class="col-sm-10">'
+            +'<div class="fd_box">'
+            +'<p class="help-block">用户支持该回报时需要填写的字段，实物回报默认使用用户收货地址。</p>'
+            +'</div>'
+            +'<button type="button" class="btn btn-default btn-addon m-b-sm add_fd" data-id="'+num+'"><i class="fa fa-plus"></i> 增加字段</button>'
+            +'</div>'
+            +'</div>'
+            +'</div>'
+            +'</div>';
+        return rewardhtml;
+    }
+</script>
+<div class="modal fade authmodal" tabindex="-1" role="dialog" aria-labelledby="authmodalLabel" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="mySmallModalLabel">增加资质</h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="authnum" value="0">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <input type="text" class="form-control" name="authname" placeholder="资质名称">
+                            <p class="help-block">如身份证正面、营业执照等</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <div class="mui-input-cell">
+                                <?=@tpl_form_field_image('authimage', '', '', array('dest_dir' => 'yh_zhongchou/auth', 'extras' => array('image'=> ' width="32" ')));?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-5 control-label">状态</label>
+                        <div class="col-sm-7">
+                            <select class="form-control m-b-sm" name="authstatus">
+                                <option value="">是否核验</option>
+                                <option value="0">未核验</option>
+                                <option value="1">已核验</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success add-auth" id="add-auth">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="<?=weburl('crowd','citydata')?>"></script>
+<script>
+    var rewardnum=<?=@$rewardnum+1?>;
+    var fdnum=<?=@$fdnum?$fdnum:0?>;
+    var subcrowdurl='<?=weburl('crowd','subcrowd')?>';
+    $(function(){
+        slscity($('input[name=city]'))
+    });
+</script>

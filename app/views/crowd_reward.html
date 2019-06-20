@@ -1,0 +1,59 @@
+<?php
+include('common/header.html');
+?>
+<style>
+    .card_reward{
+        margin-bottom: 2rem;
+    }
+    .r_m{
+        font-weight: bold;
+        font-size: 16px;
+        color: #33d3c0;
+    }
+</style>
+<div class="mui-bar mui-bar-nav">
+    <h1 class="mui-title"><?=$crowd['title']?></h1>
+    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+</div>
+<div class="mui-content page-crowd-reward">
+    <div class="mui-card card_reward">
+        <div class="mui-card-header" style="color: #555;">无偿支持</div>
+        <div class="mui-card-content">
+            <div class="mui-card-content-inner">
+                您将无偿支持此众筹项目，感谢您的无私奉献！
+            </div>
+        </div>
+        <div class="mui-card-footer jump_url" data-href="<?=appurl('crowd','paydft','crowd_id='.$crowd['id'])?>"><a class="mui-navigate-right" style="color: #777;"></a><button type="button" class="mui-btn mui-btn-primary mui-navigate-right" style="
+    float: right;
+">我要支持</button></div>
+    </div>
+    <?php foreach($rewards as $r):?>
+    <div class="mui-card card_reward" style="color: #555;">
+        <div class="mui-card-header"><?=$r['reward_title']?></div>
+        <div class="mui-card-content">
+            <div class="mui-card-content-inner">
+                <p><?=$r['reward_content']?></p>
+                <p class="mui-h6 mui-ellipsis">已有<b><?=$r['reward_count']?></b>人支持,剩余名额<b><?=$r['reward_limit']=='0'?'不限':$r['reward_limit']-$r['reward_count']?></b></p>
+                <p class="mui-h6 mui-ellipsis">您将在项目结束后<?=$r['reward_day']?>天后获得回报。</p>
+            </div>
+        </div>
+        <?php
+        if($r['reward_count']>=$r['reward_limit'] && $r['reward_limit']!=0):?>
+        <div class="mui-card-footer disable" class="mui-navigate-right">
+            该档位（<span class="r_m"><?=$r['reward_money']?></span>元）名额不足
+        </div>
+        <?php else:?>
+        <div class="mui-card-footer jump_url" style="line-height: 2" data-href="<?=appurl('crowd','pay','crowd_id='.$crowd['id'].'&reward_id='.$r['id'])?>"> <a href="javascript:;" class="mui-navigate-right" style="color: #777;">支持 <span class="r_m"><?=$r['reward_money']?></span>元</a><button type="button" class="mui-btn mui-btn-primary mui-navigate-right" style="
+    float: right;
+">我要支持</button></div>
+        <?php endif;?>
+    </div>
+    <?php endforeach; ?>
+</div>
+
+<script>
+
+</script>
+<?php
+include('common/footer.html');
+?>

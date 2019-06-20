@@ -1,0 +1,122 @@
+<div class="page-title">
+    <div class="page-breadcrumb">
+        <ol class="breadcrumb">
+            <li><a href="<?=weburl('home','index')?>">首页</a></li>
+            <li class="active"><a href="<?=weburl('crowd','clist')?>">众筹</a></li>
+            <li class="active">回报处理</li>
+        </ol>
+    </div>
+</div>
+<div id="main-wrapper">
+    <div class="row m-t-md">
+        <div class="col-md-12">
+            <div class="row orderbox-header">
+                <div class="col-md-2">
+                    <a href="<?=weburl('crowd','reportlist','id='.$crowd['id'])?>" class="btn btn-success btn-block">支持列表</a>
+                </div>
+                <div class="col-md-6">
+                    <h2><?=$crowd['title']?></h2>
+                </div>
+                <div class="col-md-4">
+                        <div class="input-group">
+                            <input type="text" class="form-control input-search search_order_input" placeholder="用户ID、昵称/订单号">
+                            <span class="input-group-btn">
+                                                <button class="btn btn-success search_order" type="button"><i class="fa fa-search"></i></button>
+                                            </span>
+                        </div><!-- Input Group -->
+                </div>
+            </div>
+        </div>
+        <div class="col-md-10 col-md-offset-2">
+            <div class="form-inline">
+                <div class="form-group">
+                    <div class="input-group m-b-sm">
+                        <span class="input-group-addon">开始时间</span>
+                        <input type="text" name="fst" value="<?=$fst?>" class="form-control date-picker">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-group m-b-sm">
+                        <span class="input-group-addon">结束时间</span>
+                        <input type="text" name="fed" value="<?=$fed?>" class="form-control date-picker">
+                    </div>
+                </div>
+                <div class="input-group m-b-sm">
+                    <select class="form-control" name="dpage">
+
+                    </select>
+                    <span class="input-group-btn">
+                        <button class="btn btn-info" id="download-btn"><i class="fa fa-download"></i></button>
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+        <div class="col-md-2">
+            <ul class="list-unstyled orderbox-nav">
+                <li>
+                    <a href="javascript:;" class="reward_order" data-aid="0" data-cid="<?=$crowd['id']?>"><i class="fa fa-gift"></i>全部待回报</a>
+                    <ul class="sub-menu" style="">
+                        <li><a href="javascript:;" class="reward_order" data-aid="0" data-cid="<?=$crowd['id']?>" data-rst="1">已处理</a></li>
+                        <li><a href="javascript:;" class="reward_order" data-aid="0" data-cid="<?=$crowd['id']?>" data-rst="0">未处理</a></li>
+                    </ul>
+                </li>
+                <?php
+                if(is_array(@$rewards)):
+                foreach($rewards as $r):?>
+                <li><a href="javascript:;" class="reward_order" data-aid="<?=$r['id']?>" data-cid="<?=$crowd['id']?>"><i class="fa fa-gift"></i><?=$r['reward_title']?></a>
+                    <ul class="sub-menu" style="">
+                        <li><a href="javascript:;" class="reward_order" data-aid="<?=$r['id']?>" data-cid="<?=$crowd['id']?>" data-rst="1">已处理</a></li>
+                        <li><a href="javascript:;" class="reward_order" data-aid="<?=$r['id']?>" data-cid="<?=$crowd['id']?>" data-rst="0">未处理</a></li>
+                    </ul>
+                </li>
+                <?php
+                endforeach;
+                endif;
+                ?>
+            </ul>
+        </div>
+        <div class="col-md-10">
+            <div class="orderbox-content report_box">
+                正在加载中...
+            </div>
+        </div>
+    </div><!-- Row -->
+</div>
+<div class="modal fade crowd_order_reward_md" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">回报处理</h4>
+            </div>
+            <div class="modal-body">
+                <form action="<?=weburl('crowd','order_reward')?>" id="order-reward-id">
+                    <input type="hidden" value="" name="order_id">
+                </form>
+                请确认承诺的回报已兑现！
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default order-md-dismiss" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success reward_sub">确认回报</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var loadurl='<?=weburl('crowd','orderrewardjson')?>';
+    var crowd_id=<?=$crowd['id']?>;
+    var downurl='<?=weburl('crowd','downreward')?>';
+    var union_id='';
+    <?=isset($crowd_union['id'])?'union_id='.$crowd_union['id'].';':''?>
+    $(function () {
+        $('.date-picker').datepicker({
+            format: 'yyyy-mm-dd',
+            language:"zh",
+            orientation: "top auto",
+            autoclose: true
+        });
+
+    })
+</script>

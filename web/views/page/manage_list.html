@@ -1,0 +1,143 @@
+<div class="page-title">
+    <div class="page-breadcrumb">
+        <ol class="breadcrumb">
+            <li><a href="<?=weburl('home','index')?>">首页</a></li>
+            <li class="active">管理员列表</li>
+        </ol>
+    </div>
+</div>
+<div id="main-wrapper">
+    <div class="row">
+        <div class="panel panel-dark">
+            <div class="panel-body">
+                <div style="text-align: right; margin-bottom: 10px">
+                    <button id="add-manage" class="btn btn-default" >新增管理员</button>
+                </div>
+                <div class="table-responsive">
+                    <div class="dataTables_wrapper project-stats">
+                        <table id="crowdtable" class="display table" style="width: 100%;" role="grid">
+                            <thead>
+                            <tr role="row">
+                                <th rowspan="1" colspan="1" style="width: 80px;">ID</th>
+                                <th rowspan="1" colspan="1" style="width: 80px;">角色</th>
+                                <th rowspan="1" colspan="1" style="width: 90px;">部门</th>
+                                <th rowspan="1" colspan="1" style="min-width: 200px">姓名</th>
+                                <th rowspan="1" colspan="1" style="width: 140px">手机号码</th>
+                                <th rowspan="1" colspan="1"  style="width: 140px">邮箱</th>
+                                <th rowspan="1" colspan="1" style="width: 65px;">QQ</th>
+                                <th rowspan="1" colspan="1" style="width: 100px;">加入时间</th>
+                                <th rowspan="1" colspan="1" style="width: 180px;">最新操作时间</th>
+                                <th rowspan="1" colspan="1" style="width: 100px;">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php if(is_array($manage)):foreach($manage as $m):?>
+                            <tr role="row" id="m_list_<?=$m['id']?>" data-info="<?=urlencode(json_encode($m))?>">
+                                <td rowspan="1" colspan="1"><?=$m['user_id']?></td>
+                                <td rowspan="1" colspan="1"><?=$m['role_name']?></td>
+                                <td rowspan="1" colspan="1"><?=$m['group_name']?></td>
+                                <td rowspan="1" colspan="1"><?=$m['name']?></td>
+                                <td rowspan="1" colspan="1"><?=$m['phone']?></td>
+                                <td rowspan="1" colspan="1"><?=$m['email']?></td>
+                                <td rowspan="1" colspan="1"><?=$m['qq']?></td>
+                                <td rowspan="1" colspan="1"><?=date('Y-m-d H:i',$m['addtime'])?></td>
+                                <td rowspan="1" colspan="1"><?=date('Y-m-d H:i',$m['lasttime'])?></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-primary btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">操作<span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li class="edit_manage" data-id="<?=$m['id']?>"><a href="javascript:;">编辑</a></li>
+                                            <li class="del_manage" data-id="<?=$m['id']?>"><a href="javascript:;" >删除</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach;endif?>
+                            </tbody>
+                        </table>
+                        <?=paginations($pagination,'manage','mlist')?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- Main Wrapper -->
+<div class="modal fade bs-manage-modal-sm in" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="mySmallModalLabel">新增管理员</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" name="manage-form" id="manage-form" action="<?=weburl('manage','submanage')?>">
+                    <input type="hidden" name="id" value="0">
+                    <div class="form-group">
+                        <div class="input-group input-append">
+                            <input id="search-user" placeholder="微擎用户ID或用户名" type="text" class="form-control">
+                            <input type="hidden" name="user_id">
+                            <span class="input-group-addon add-on" id="search-user-sub"><i class="fa fa-search"></i></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <select name="role_id" class="form-control m-b-sm">
+                            <option disabled selected>选择角色</option>
+                            <?php foreach($role as $ro):?>
+                            <option value="<?=$ro['role_id']?>"><?=$ro['role_name']?></option>
+                            <?php endforeach;?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="group_id" class="form-control m-b-sm">
+                            <option disabled selected>选择部门</option>
+                            <?php foreach($group as $gp):?>
+                            <option value="<?=$gp['group_id']?>"><?=$gp['group_name']?></option>
+                            <?php endforeach;?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="name" placeholder="真实姓名">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="phone" placeholder="手机号码">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="email" placeholder="邮箱地址">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="qq" placeholder="QQ号码">
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success" id="manage-sub">增加</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade manage-del-ml in" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">删除管理员</h4>
+            </div>
+            <div class="modal-body">
+                <form name="manage-del-form" id="manage-del-form" action="<?=weburl('manage','delmanage')?>">
+                    <input type="hidden" id="manage-del-id" name="id" value="">
+                </form>
+                请确认是否真的要删除管理员，该操作不会删除和修改微擎对于该用户的设置，但将不再拥有使用该系统（众筹）的权限。
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success" id="manage-del-sub">确认删除管理员？</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var searchuserurl='<?=weburl('manage','searchuser')?>';
+</script>

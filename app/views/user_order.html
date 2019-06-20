@@ -1,0 +1,127 @@
+<?php
+include('common/header.html');
+?>
+<div class="mui-bar mui-bar-nav">
+    <h1 class="mui-title">我的订单</h1>
+    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+</div>
+<div class="mui-content user-order">
+    <div class="m_document">
+        <div class="mySupportList">
+            <div class="panel clearfix">
+                <div class="info">
+                    <div class="item">
+                        <span class="mui-icon-extra mui-icon-extra-like"></span>
+                        <p class="cishu"><?=number_format($rpt['ttcount'])?></p>
+                        <p>支持次数</p>
+                    </div>
+                    <div class="item">
+                        <span class="mui-icon-extra mui-icon-extra-calc"></span>
+                        <p class="pay_count"><?=number_format($rpt['ttmoney'],2)?></p>
+                        <p>总金额(元)</p>
+                    </div>
+                    <div class="item">
+                        <span class="mui-icon-extra mui-icon-extra-express"></span>
+                        <p><?=number_format($rptwait)?></p>
+                        <p>待回报</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="render-block">
+                <div class="report-box">
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+    var page=1;
+    var limit=10;
+    var lock=0;
+$(function(){
+    loadorder();
+    $('.mui-content').scroll(function(){
+        if ($('.m_document').height() -$(this).scrollTop() - $(this).height()<200){
+            loadorder();
+        }
+    });
+})
+function loadorder(){
+    if(lock==1){
+        return;
+    }else{
+        lock=1;
+    }
+    $.getJSON("<?=appurl('user','myreport')?>",{page:page,limit:limit},function(d){
+        if(d.id==1){
+            putorderlist(d.data);
+            lock=0;
+        }else{
+            lock=1;
+            $('.render-block').append('<div class="flow-more">没有更多了</div>');
+        }
+    })
+}
+function putorderlist(d){
+    var html='';
+        for(var o in d){
+            html+='<div class="centent_box">'+
+                '<div class="image_box">'+
+                '<span class="o-l-img"></span>'+
+                '<span class="jiage_li">'+d[o].money+'</span>'+
+                '</div>'+
+                '<div class="rt_cenbox2">'+
+                '<div class="rt_cenbox">'+
+                '<span class="bianjiao"></span>'+
+                '<div class="top_rt_cenbox">'+
+                '<span class="span_left1">'+
+                '<span class="mui-icon-extra mui-icon-extra-lamp"></span>众筹订单</span>'+
+                '<a href="../orderdetails/orderdetails.html">'+
+                '<span class="span_left2">'+
+                '<span class="span_left222">#'+d[o].addtime+d[o].id+'</span>'+
+                '</span>'+
+                '</a>'+
+                '</div>'+
+                '<div class="bottom_box1">'+
+                '<div class="text_lis44">'+
+                '<span>项目状态</span>'+
+                '<span class="shenglue_1">'+(d[o].status==0?'未支付':(d[o].status==1?'已支付':(d[o].status==-2?'已退款':'已取消')))+'</span>'+
+                '</div>'+
+                '<div class="text_lis44">'+
+                '<span>项目名称</span>'+
+                '<span class="shenglue_1 shenglue_2 jumps_url" data-href="<?=appurl('crowd','detail')?>&id='+d[o].crowd_id+'">'+d[o].ctitle+'</span>'+
+                '</div>';
+            if(d[o].unickname){
+                html+='<div class="text_lis44">'+
+                '<span>被支持人</span>'+
+                '<span class="shenglue_1 shenglue_2 jumps_url" data-href="<?=appurl('crowd','uniondetail')?>&union_id='+d[o].union_id+'">'+d[o].unickname+'</span>'+
+                '</div>';
+            }
+            if(d[o].reward_id>0){
+                html+='<div class="text_lis44">'+
+                    '<span>回报状态</span>'+
+                    '<span class="shenglue_1 shenglue_2">'+(d[o].reward_status==1?'已处理':'待处理')+'</span>'+
+                '</div>';
+            }
+            html+='<div class="text_lis44">'+
+                '<span>支持时间</span>'+
+                '<span class="shenglue_1">'+d[o].uaddtime+'</span>'+
+                '</div>'+
+                '</div>'+
+                '</div>'+
+                '</div>'+
+                '</div>';
+        }
+        $('.report-box').append(html);
+        $('.jumps_url').on('tap',function(){
+            location.href=$(this).data('href');
+        })
+    page++;
+}
+</script>
+<?php
+include('common/footer.html');
+?>

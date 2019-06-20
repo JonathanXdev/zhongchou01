@@ -1,0 +1,197 @@
+<?php
+//此文件为全局公共框架文件，请勿随意改动
+$sys=mysys();
+$crowd_total = pdo_fetchcolumn("SELECT COUNT(*) FROM ".tablename('yhzc_crowd_cache')." where status=1 and uniacid={$w['uniacid']}");
+$crowd_union = pdo_fetchall("SELECT * FROM ".tablename('yhzc_crowd_union')." where status=0 and uniacid={$w['uniacid']}");
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Title -->
+    <title><?=$title?>|<?=@$sys['sysname']==''?'一点众筹':@$sys['sysname']?></title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <meta charset="UTF-8">
+    <meta name="description" content="<?=$description?>" />
+    <meta name="keywords" content="<?=$keywords?>" />
+    <meta name="author" content="WayneXu" />
+    <!-- Styles -->
+    <script type="text/javascript">
+        if(navigator.appName == 'Microsoft Internet Explorer'){
+            if(navigator.userAgent.indexOf("MSIE 5.0")>0 || navigator.userAgent.indexOf("MSIE 6.0")>0 || navigator.userAgent.indexOf("MSIE 7.0")>0) {
+                alert('您使用的 IE 浏览器版本过低, 推荐使用 Chrome 浏览器或 IE8 及以上版本浏览器.');
+            }
+        }
+        window.sysinfo = {
+        <?=!empty($w['uniacid'])?'uniacid:'.$w['uniacid'].',':''?>
+        <?=!empty($w['acid'])?'acid:'.$w['acid'].',':''?>
+        <?=!empty($w['openid'])?'openid:'.$w['openid'].',':'' ?>
+        <?=!empty($w['uid'])?'uid:'.$w['uid'].',':'' ?>
+        'isfounder': <?=!empty($w['isfounder'])?1:0 ?>,
+        'siteroot': '<?=$w['siteroot']?>',
+            'siteurl': '<?=$w['siteurl']?>',
+            'attachurl': '<?=$w['attachurl']?>',
+            'attachurl_local': '<?=$w['attachurl_local']?>',
+            'attachurl_remote': '<?=!empty($w['attachurl_remote'])?$w['attachurl_remote']:''?>',
+            'module' : {'url' : '<?=defined('MODULE_URL')?MODULE_URL:''?>', 'name' : '<?=defined('IN_MODULE')?IN_MODULE:''?>'},
+        'cookie' : {'pre': '<?=$w['config']['cookie']['pre']?>'},
+        'account' : <?=json_encode($w['account'])?>,
+        };
+    </script>
+    <!--<link href="./resource/css/common.css?v=20180322" rel="stylesheet">-->
+
+    <?php
+loadstyles(['plugins/line-icons/simple-line-icons.css','plugins/pace-master/themes/blue/pace-theme-flash.css','plugins/bootstrap/css/bootstrap.min.css','plugins/fontawesome/css/font-awesome.min.css','plugins/toastr/toastr.min.css','css/themes/green.css'])
+?>
+    <!-- Theme Styles -->
+    <?php if(isset($styles)):if(is_array($styles)):foreach($styles as $style):?>
+    <?php loadstyles($style)?>
+    <?php endforeach;endif;endif?>
+    <?php loadstyles(['css/modern.css','css/custom.css','plugins/switchery/switchery.css'])?>
+    <script>
+        var uploadurl='<?=weburl('upload','index')?>';
+    </script>
+    <?php
+loadscripts(['plugins/jquery/jquery-2.1.4.min.js','plugins/jquery-ui/jquery-ui.min.js','plugins/bootstrap/js/bootstrap.min.js','plugins/pace-master/pace.min.js','plugins/jquery-slimscroll/jquery.slimscroll.min.js','plugins/waves/waves.min.js','plugins/toastr/toastr.min.js','plugins/uniform/jquery.uniform.min.js','plugins/flot/jquery.flot.min.js','plugins/flot/jquery.flot.tooltip.min.js','plugins/metrojs/MetroJs.min.js','plugins/switchery/switchery.js','js/modern.min.js'])
+
+?>
+    <script type="text/javascript" src="./resource/js/app/util.js?v=20180322"></script>
+    <script type="text/javascript" src="./resource/js/app/common.min.js?v=20180322"></script>
+    <script type="text/javascript" src="./resource/js/require.js?v=20180322"></script>
+</head>
+<body class="page-header-fixed page-sidebar-fixed">
+<div class="overlay"></div>
+<main class="page-content content-wrap">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="sidebar-pusher">
+                <a href="javascript:void(0);" class="waves-effect waves-button waves-classic push-sidebar">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+            <div class="logo-box">
+                <a href="<?=weburl('home','index')?>" class="logo-text"><span class="l-name"><?=@$sys['sysname']==''?'完美众筹':@$sys['sysname'];?></span></a>
+            </div><!-- Logo Box -->
+            <div class="topmenu-outer">
+                <span class="top-menu">
+                    <ul class="nav navbar-nav navbar-left">
+                        <li>
+                            <a href="javascript:void(0);" class="waves-effect waves-button waves-classic sidebar-toggle"><i class="fa fa-bars"></i></a>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0);" class="waves-effect waves-button waves-classic toggle-fullscreen"><i class="fa fa-expand"></i></a>
+                        </li>
+                        <li class="no-link" role="presentation">
+                            <a href="javascript:void(0);" class="waves-effect waves-button waves-classic switch-md">
+                                自动任务
+                                <input type="checkbox" class="autotask-check switchery" >
+                                <i class="fa fa-question-circle task-info"></i>
+                            </a>
+
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle waves-effect waves-button waves-classic" data-toggle="dropdown"><i class="fa fa-bell"></i><span class="badge badge-success pull-right"><?=$crowd_total?></span></a>
+                            <ul class="dropdown-menu title-caret dropdown-lg" role="menu">
+                                <li class="dropdown-menu-list slimscroll tasks">
+                                    <ul class="list-unstyled">
+                                        <li>
+                                            <a href="<?=weburl('crowd','check')?>">
+                                                <div class="task-icon badge badge-success">众</div>
+                                                <p class="task-details">待审核众筹项目（<?=$crowd_total?>）条</p>
+                                            </a>
+                                        </li>
+
+                                    </ul>
+                                </li>
+
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="<?=$w['siteroot']?>web/index.php?c=user&a=logout&" class="log-out waves-effect waves-button waves-classic">
+                                <span><i class="fa fa-sign-out m-r-xs"></i>注销</span>
+                            </a>
+                        </li>
+                    </ul><!-- Nav -->
+                </div><!-- Top Menu -->
+            </div>
+        </div>
+    </div><!-- Navbar -->
+    <div class="page-sidebar sidebar">
+        <div class="page-sidebar-inner slimscroll">
+            <ul class="menu accordion-menu">
+                <?php foreach(menuarr() as $m):?>
+                <li class="<?=isset($m['sub'])?'droplink':''?> <?=segment('mc')==$m['mc']?'active open':''?>">
+                    <a href="<?=isset($m['sub'])?'#':weburl($m['mc'],$m['mm'])?>" class="waves-effect waves-button"><span class="menu-icon glyphicon <?=$m['icon']?>"></span><p><?=$m['name']?></p>
+                        <?=isset($m['sub'])?'<span class="arrow"></span>':''?>
+                    </a>
+                    <?php if(isset($m['sub'])):?>
+                    <ul class="sub-menu" style="display: none;">
+                        <?php if(@is_array($m[sub])):
+                            foreach($m['sub'] as $sub):
+                        ?>
+                        <li <?=segment('mm')==$sub['mm']?'class="active"':''?>><a href="<?=weburl($sub['mc'],$sub['mm'])?>"><?=$sub['name']?></a></li>
+                        <?php endforeach;endif;?>
+                    </ul>
+                    <?php endif; ?>
+                </li>
+                <?php endforeach;?>
+            </ul>
+        </div><!-- Page Sidebar Inner -->
+    </div><!-- Page Sidebar -->
+    <div class="page-inner">
+        <?php $this->load->view('page/'.$pagename.'.html')?>
+        <div class="page-footer">
+            <?=@$sys['statcode']?>
+            <div class="container-fluid footer text-center" role="footer">
+                <p class="no-s"><?=date('Y')?> &copy; <a href="<?=@$sys['website']==''?'/':@$sys['website']?>" target="_blank"><?=@$sys['sysname']==''?'一点众筹':@$sys['sysname']?></a></p>
+                <div class="copyright">
+                    <?php if(empty($w['setting']['copyright']['footerleft'])):?>Powered by <a href="http://www.we7.cc"><b>微擎</b></a> v<?=IMS_VERSION?> &copy; 2014-2015 <a href="http://www.we7.cc">www.we7.cc</a><?php else:?><?=$w['setting']['copyright']['footerleft']?><?php endif;?></div>
+                <?php if(!empty($w['setting']['copyright']['icp'])):?><div>备案号：<a href="http://www.miitbeian.gov.cn" target="_blank"><?=$w['setting']['copyright']['icp']?></a></div><?php endif;?>
+            </div>
+        </div>
+    </div><!-- Page Inner -->
+</main><!-- Page Content -->
+<div class="cd-overlay"></div>
+<?php if(isset($scripts)):if(is_array($scripts)):foreach($scripts as $script):?>
+<?php loadscripts($script)?>
+<?php endforeach;endif;endif?>
+<script type="text/javascript" src="<?=weburl('api','check')?>" async="async"></script>
+<script>
+    var taskswitch = new Switchery(document.querySelector('.autotask-check'),{
+        color: '#23B7E5',
+        jackColor: '#fff'
+    });
+    $(function () {
+        $.getJSON("<?=weburl('task','check')?>",function (d) {
+            console.log(d);
+            if(d.id==1){
+                taskswitch.setPosition(true);
+            }else{
+                taskswitch.setPosition(false);
+            }
+        });
+        $('.autotask-check').change(function () {
+            if(this.checked==false){
+                $.getJSON("<?=weburl('task','offtask')?>",function (d) {
+                    console.log(d);
+                    if(d.id==-1){
+                        taskswitch.setPosition(true);
+                    }
+                });
+            }else{
+                $.getJSON("<?=weburl('task','ontask')?>",function (d) {
+                    console.log(d);
+                    if(d.id==-1){
+                        taskswitch.setPosition(false);
+                    }
+                });
+            }
+        });
+        $('.task-info').on('click',function () {
+            toastr["success"]("定计划任务开启后，会消耗部分服务器资源，同时将支持一键批量退款，众筹成功或失败通知等功能！");
+        });
+    })
+</script>
+</body>
+</html>

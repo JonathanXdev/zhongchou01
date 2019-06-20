@@ -1,0 +1,190 @@
+<div class="page-title">
+    <div class="page-breadcrumb">
+        <ol class="breadcrumb">
+            <li><a href="<?=weburl('home','index')?>">首页</a></li>
+            <li class="active">联合众筹[<?=$crowd['title']?>]报名列表</li>
+        </ol>
+    </div>
+</div>
+<div id="main-wrapper">
+    <div class="row">
+        <div class="panel panel-dark">
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <div class="dataTables_wrapper project-stats">
+                        <div class="col-md-10">
+                            <div class="col-md-2">
+                                <select class="form-control m-b-sm" name="fg">
+                                    <option value="all" <?=$fg=='' || $fg=='all'?'selected':''?>>选择状态</option>
+                                    <option value="1" <?=$fg=='1'?'selected':''?>>已完成</option>
+                                    <option value="0" <?=$fg=='0'?'selected':''?>>未完成</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-control m-b-sm" name="team_id">
+                                    <option value="all">选择队伍</option>
+                                    <?php if(!empty($team)):foreach($team as $t):?>
+                                    <option value="<?=$t['id']?>" <?=$team_id==$t['id']?'selected':''?>><?=$t['name']?></option>
+                                    <?php endforeach;endif;?>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="input-group m-b-sm">
+                                    <input type="text" name="fst" value="<?=$fst?>" class="form-control date-picker" placeholder="开始时间">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="input-group m-b-sm">
+                                    <input type="text" name="fed" value="<?=$fed?>" class="form-control date-picker" placeholder="结束时间">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <input type="text" name="keys"  class="form-control input-search" placeholder="姓名、昵称/手机号">
+                                    <span class="input-group-btn">
+                                                    <button class="btn btn-default" id="filter-btn">查找</button>
+                                                </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="col-md-8">
+                                <select class="form-control m-b-sm" name="dpage">
+                                    <option disabled>选择包</option>
+                                    <?php $climit=100;for($i=0;$i*$climit<$pagination[0];$i++):$sl=($i)*$climit;?>
+                                    <option value="<?=$i+1?>">第<?=$sl+1?>到<?=$sl+$climit>$pagination[0]?$pagination[0]:$sl+$climit?>条</option>
+                                    <?php endfor;?>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-default" id="download-btn"><i class="fa fa-download"></i></button>
+                            </div>
+                        </div>
+                        <table id="crowdtable" class="display table" style="width: 100%;" role="grid">
+                            <thead>
+                            <tr role="row">
+                                <th rowspan="1" colspan="1" style="width: 80px;">用户ID</th>
+                                <th rowspan="1" colspan="1" style="width: 160px;">用户信息</th>
+                                <th rowspan="1" colspan="1" style="width: 80px;">队伍</th>
+                                <th rowspan="1" colspan="1" style="min-width: 140px">口号</th>
+                                <th rowspan="1" colspan="1" style="width: 90px;">支持次数</th>
+                                <th rowspan="1" colspan="1" style="width: 90px;">已筹金额</th>
+                                <th rowspan="1" colspan="1" style="width: 160px;">报名时间</th>
+                                <th rowspan="1" colspan="1" style="width: 160px;">完成时间</th>
+                                <th rowspan="1" colspan="1" style="width: 160px;">邀请者</th>
+                                <th rowspan="1" colspan="1" style="width: 100px;">状态</th>
+                                <th rowspan="1" colspan="1" style="width: 80px;">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php if(is_array($crowd_union)):foreach($crowd_union as $c):?>
+                            <tr role="row">
+                                <td rowspan="1" colspan="1"><?=$c['user_id']?></td>
+                                <td>
+                                    <div>
+                                        <div><img src="<?=$c['avatar']?>" width="40" class="img-circle" alt=""></div>
+                                        <br/>昵称：<?=$c['nickname']?>
+                                        <br/>姓名：<?=$c['realname']?>
+                                        <br/>手机：<?=$c['phone']?>
+                                    </div>
+                                </td>
+                                <td rowspan="1" colspan="1"><?=$c['tname']==''?'无':$c['tname']?></td>
+                                <td rowspan="1" colspan="1"><?=$c['summary']?></td>
+                                <td rowspan="1" colspan="1"><?=$c['ppnum']?></td>
+                                <td rowspan="1" colspan="1">￥<?=$c['cjmoney']?>
+                                <br/>
+                                    <div class="progress">
+                                        <?php $pronum=ceil($c['cjmoney']/($crowd['money']==0?1:$crowd['money'])*100)?>
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="<?=$pronum?>" aria-valuemin="0" aria-valuemax="100" style="width: <?=$pronum?>%"><?=$pronum?>%</div>
+                                    </div>
+
+                                </td>
+                                <td rowspan="1" colspan="1"><?=date('Y-m-d H:i',$c['addtime'])?></td>
+                                <td rowspan="1" colspan="1"><?=$c['endtime']==''?'':date('Y-m-d H:i',$c['endtime'])?></td>
+                                <td>
+                                    <?php if($c['f_uid']>0):?>
+                                    <div>
+                                        <a href="<?=weburl('crowd','bmlist',array('crowd_id'=>$c['crowd_id'],'f_uid'=>$c['f_uid']))?>">
+                                        <div><img src="<?=$c['favatar']?>" width="40" class="img-circle" alt=""></div>
+                                        <br/>UID：<?=$c['f_uid']?>
+                                        <br/>昵称：<?=$c['fnickname']?>
+                                        <br/>姓名：<?=$c['frealname']?>
+                                        <br/>手机：<?=$c['fphone']?>
+                                        </a>
+                                    </div>
+                                    <?php else:echo '无';endif;?>
+                                </td>
+                                <td rowspan="1" colspan="1"><?=$c['status']=='1'?'已审核':($c['status']=='0'?'待审核':'审核失败')?></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-primary btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">操作<span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li class="union-change-md" data-st="<?=$c['status']?>" data-id="<?=$c['id']?>"><a href="#">审核</a></li>
+                                            <li class="divider"></li>
+                                            <li><a href="<?=weburl('crowd','reportlist','id='.$crowd['id'].'&union_id='.$c['id'])?>">支持列表</a></li>
+                                            <li><a href="<?=weburl('comment','index','vfrom=union&from_id='.$c['id'])?>">留言管理</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach;endif?>
+                            </tbody>
+                        </table>
+                        <?=paginations($pagination,'crowd','bmlist','crowd_id='.$crowd['id'].($fst!=''?'&fst='.$fst:'').($fed!=''?'&fed='.$fed:'').($fg!=''?'&fg='.$fg:''))?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- Main Wrapper -->
+<div class="modal fade bs-bmsh-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">报名审核</h4>
+            </div>
+            <div class="modal-body">
+                <form action="<?=weburl('crowd','unionchange')?>" id="union-form">
+                    <input value="0" type="hidden" name="union_id">
+                    <select multiple="" class="form-control" name="status">
+                        <option value="1">审核通过</option>
+                        <option value="-1">审核失败</option>
+                    </select>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default bmsh-dismiss">取消</button>
+                <button type="button" class="btn btn-success union-form-sub">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    $(function(){
+        $('.date-picker').datepicker({
+            format: 'yyyy-mm-dd',
+            language:"zh",
+            orientation: "top auto",
+            autoclose: true
+        });
+        $('#filter-btn').on('click',function(){
+            var fst=$('input[name=fst]').val();
+            var fed=$('input[name=fed]').val();
+            var fg=$('select[name=fg]').val();
+            var keys=$('input[name=keys]').val();
+            var team_id=$('select[name=team_id]').val();
+            location.href='<?=weburl('crowd','bmlist','crowd_id='.$crowd['id'])?>'+(fst!=''?'&fst='+fst:'')+(fed!=''?'&fed='+fed:'')+(fg!=''?'&fg='+fg:'')+(team_id!=''?'&team_id='+team_id:'')+(keys!=''?'&keys='+keys:'');
+        })
+        $('#download-btn').on('click',function(){
+            var fst=$('input[name=fst]').val();
+            var fed=$('input[name=fed]').val();
+            var fg=$('select[name=fg]').val();
+            var team_id=$('select[name=team_id]').val();
+            var dpage=$('select[name=dpage]').val();
+            window.open('<?=weburl('crowd','downunion','crowd_id='.$crowd['id'])?>'+(fst!=''?'&fst='+fst:'')+(fed!=''?'&fed='+fed:'')+(fg!=''?'&fg='+fg:'')+(dpage!=''?'&dpage='+dpage:'')+(team_id!=''?'&team_id='+team_id:''));
+        })
+    })
+</script>

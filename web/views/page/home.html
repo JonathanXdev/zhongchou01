@@ -1,0 +1,161 @@
+
+<div id="main-wrapper">
+    <div class="row">
+        <div class="col-lg-3 col-md-6">
+            <div class="panel info-box panel-dark">
+                <div class="panel-body">
+                    <div class="info-box-stats">
+                        <p><span class="counter"><?=number_format($tdtongji['pv'])?></span>/<?=number_format($ydtongji['pv'])?></p>
+                        <span class="info-box-title">访问数(今/昨)</span>
+                    </div>
+                    <div class="info-box-icon">
+                        <i class="icon-eye"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="panel info-box panel-dark">
+                <div class="panel-body">
+                    <div class="info-box-stats">
+                        <p><span class="counter"><?=number_format($tdtongji['report'])?></span>/<?=number_format($ydtongji['report'])?></p>
+                        <span class="info-box-title">支持数(今/昨)</span>
+                    </div>
+                    <div class="info-box-icon">
+                        <i class="icon-users"></i>
+                    </div>
+                    <!--<div class="info-box-progress">
+                        <div class="progress progress-xs progress-squared bs-n">
+                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+                            </div>
+                        </div>
+                    </div>-->
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="panel info-box panel-dark">
+                <div class="panel-body">
+                    <div class="info-box-stats">
+                        <p>￥<span class="counter"><?=jhmoney($tdtongji['cjmoney'])?></span>/<?=jhmoney($ydtongji['cjmoney'])?></p>
+                        <span class="info-box-title">筹款总额(今/昨)</span>
+                    </div>
+                    <div class="info-box-icon">
+                        <i class="icon-magnet"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="panel info-box panel-dark">
+                <div class="panel-body">
+                    <div class="info-box-stats">
+                        <p class="counter"><?=$crowd_num?></p>
+                        <span class="info-box-title">进行中项目</span>
+                    </div>
+                    <div class="info-box-icon">
+                        <i class="icon-direction"></i>
+                    </div>
+                    <!--<div class="info-box-progress">
+                        <div class="progress progress-xs progress-squared bs-n">
+                            <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%">
+                            </div>
+                        </div>
+                    </div>-->
+                </div>
+            </div>
+        </div>
+    </div><!-- Row -->
+    <div class="row">
+        <div class="col-lg-12 col-md-12">
+            <div class="panel panel-dark">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="visitors-chart">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">趋势统计</h4>
+                                <div class="panel-control">
+                                    <span class="pv-color">访问量（pv）</span>
+                                    <span class="rp-color">支持次数</span>
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                <?php
+                                if(@is_array($alltongji)):
+                                $pvvar='[';
+                                $reportvar='[';
+                                $dtvar='[';
+                                $fsize=10;
+                                $tmtongji=array();
+                                $ttmtongji=array();
+                                $tmtime=strtotime(date("Y-m-d",strtotime("-1 day")));
+                                $ttmtime=strtotime(date("Y-m-d",strtotime("-2 day")));
+                                foreach($alltongji as $k=>$t):
+                                    if($tmtime==$t['addtime']){
+                                        $tmtongji=$t;
+                                    }
+                                    if($ttmtime==$t['addtime']){
+                                        $ttmtongji=$t;
+                                    }
+                                    if($k>0){
+                                        $pvvar.=',';
+                                        $reportvar.=',';
+                                        $dtvar.=',';
+                                    }
+                                    $fs=ceil($t['pv']/10);
+                                    if($fsize<$fs){
+                                        $fsize=$fs;
+                                    }
+                                    $dtvar.='\''.date('Y-m-d',$t['addtime']).'\'';
+                                    $pvvar.='['.$k.','.$t['pv'].']';
+                                    $reportvar.='['.$k.','.$t['report'].']';
+                                endforeach;
+                                endif;
+                                $pvvar.=']';
+                                $reportvar.=']';
+                                $dtvar.=']';
+                                ?>
+                                <div id="flotchart1" data-d="[<?=$pvvar?>,<?=$reportvar?>]" data-t="<?=$dtvar?>" data-s="<?=$fsize?>"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="stats-info">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">关键数据升降(日)</h4>
+                            </div>
+                            <div class="panel-body">
+                                <ul class="list-unstyled">
+                                    <?php
+                                    if(empty($tmtongji) || empty($ttmtongji)){
+                                        $pvbfb=$rpbfb=$hybfb=$cjbfb=100;
+                                    }else{
+                                        $pvbmms=$tmtongji['pv']-$ttmtongji['pv'];
+                                        $pvbfb=@ceil($pvbmms/$ttmtongji['pv']*100);
+                                        $rpbmms=$tmtongji['report']-$ttmtongji['report'];
+                                        $rpbfb=@ceil($rpbmms/$ttmtongji['report']*100);
+                                        //活跃
+                                        $tdhy=($tmtongji['report']/$tmtongji['pv'])*100;
+                                        $tmhy=($ttmtongji['report']/$ttmtongji['pv'])*100;
+                                        $hybmms=$tdhy-$tmhy;
+                                        $hybfb=@ceil($hybmms/$tmhy*100);
+                                        //资金
+                                        $cjbmms=$tmtongji['cjmoney']-$ttmtongji['cjmoney'];
+                                        $cjbfb=@ceil($cjbmms/$ttmtongji['cjmoney']*100);
+                                    }
+                                    ?>
+                                    <li>访问量<div class="text-<?=$pvbfb<0?'success':'danger';?> pull-right"><?=abs($pvbfb)?>%<i class="fa fa-level-<?=$pvbfb<0?'down':'up';?>"></i></div></li>
+                                    <li>参与人次<div class="text-<?=$rpbfb<0?'success':'danger';?> pull-right"><?=abs($rpbfb)?>%<i class="fa fa-level-<?=$rpbfb<0?'down':'up';?>"></i></div></li>
+                                    <li>活跃度<div class="text-<?=$hybfb<0?'success':'danger';?> pull-right"><?=abs($hybfb)?>%<i class="fa fa-level-<?=$hybfb<0?'down':'up';?>"></i></div></li>
+                                    <li>资金流水<div class="text-<?=$cjbfb<0?'success':'danger';?> pull-right"><?=abs($cjbfb)?>%<i class="fa fa-level-<?=$cjbfb<0?'down':'up';?>"></i></div></li>
+
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div><!-- Main Wrapper -->

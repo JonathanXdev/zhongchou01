@@ -1,0 +1,169 @@
+<?php
+include('common/header.html');
+?>
+<style>
+    #address-box .mui-card{
+        margin:1rem;
+    }
+    #address-box .mui-card-link{
+        float: right;
+    }
+    #address-box .sls-address{
+        float: left;
+    }
+</style>
+<div id="address-box" class="mui-content sub-page" style="display: none;z-index: 99;padding: 4rem 0;">
+    <div class="mui-bar mui-bar-nav">
+        <h1 class="mui-title">我的收货地址</h1>
+        <a class="mui-icon mui-icon-left-nav mui-pull-left jump_url" data-href="<?=appurl('user','index')?>"></a>
+    </div>
+    <div class="address_list">
+        <div class="d_l_li">
+
+        </div>
+        <div class="mui-row btm_menu">
+            <div class="mui-col-sm-12 mui-col-xs-12 open-add-address" data-id="0">新增地址</div>
+        </div>
+    </div>
+</div>
+<div id="add-address-box" class="mui-content sub-page" style="display: none;z-index: 99;padding-top: 5rem;">
+    <div class="mui-bar mui-bar-nav">
+        <h1 class="mui-title">请添加收货地址</h1>
+        <a class="mui-icon mui-icon-left-nav mui-pull-left close-sub-page" data-p="add-address-box"></a>
+    </div>
+    <div class="add_address">
+        <div class="mui-card">
+            <div class="mui-card-content">
+                <div class="mui-card-content-inner">
+                    <form class="mui-input-group" id="addressform">
+                        <input type="hidden" name="address_id" value="0">
+                        <div class="mui-input-row">
+                            <label>姓名</label>
+                            <input type="text" name="name" placeholder="收货人姓名">
+                        </div>
+                        <div class="mui-input-row">
+                            <label>手机号</label>
+                            <input type="text" name="phone" placeholder="手机号">
+                        </div>
+                        <div class="mui-input-row">
+                            <label>省市</label>
+                            <input class="mui-district-picker-address" placeholder="请选择地区" type="text" readonly value=""/>
+                            <input type="hidden" value="" name="address[province]"/>
+                            <input type="hidden" value="" name="address[city]"/>
+                            <input type="hidden" value="" name="address[district]"/>
+                        </div>
+                        <div class="mui-input-row">
+                            <label>详细地址</label>
+                            <input type="text" name="other" placeholder="详细收货地址">
+                        </div>
+                        <div class="mui-input-row">
+                            <label>邮编</label>
+                            <input name="zipcode" type="text" placeholder="邮政编码">
+                        </div>
+                        <div class="mui-button-row">
+                            <button type="button" class="mui-btn mui-btn-primary add-address-btn" style="width:90%">确认</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function(){
+        loadaddress();
+        $('.open-add-address').on('tap',function(){
+            showaddadbox();
+        })
+        $('.close-sub-page').on('tap',function(){
+            $('#address-box').show();
+            $('#'+$(this).data('p')).hide();
+        })
+        $('.mui-district-picker-address').on("tap", function(){
+            var $this = $(this);
+            util.districtpicker(function(item){
+                $this.val(item[0].text+" "+item[1].text+" "+item[2].text).next().val(item[0].text).next().val(item[1].text).next().val(item[2].text);
+            }, {province : "", city : "", district : ""});
+        });
+        $('.add-address-btn').on('tap',function(){
+            $.post("<?=appurl('user','addaddress')?>",$('#addressform').serialize(),function(d){
+                if(d.id==1){
+                    loadaddress();
+                    $('#address-box').show();
+                    $('#add-address-box').hide();
+                }else{
+                    mui.alert(d.msg);
+                }
+            },'json')
+        })
+    })
+    function showaddadbox(adid){
+        $('input[name=address_id]').val('');
+        $('input[name=name]').val('');
+        $('input[name=phone]').val('');
+        $('input[name=other]').val('');
+        $('input[name=zipcode]').val('');
+        if(adid>0){
+            $.getJSON("<?=appurl('user','addressjson')?>",{id:adid},function(d){
+                if(d.id==-1){
+                    mui.alert(d.msg);
+                }else{
+                    $('input[name=address_id]').val(d.data.id);
+                    $('input[name=name]').val(d.data.name);
+                    $('input[name=phone]').val(d.data.phone);
+                    $('.mui-district-picker-address').val(d.data.province+' '+d.data.city+' '+d.data.district);
+                    $('.mui-district-picker-address').next().val(d.data.province).next().val(d.data.city).next().val(d.data.district);
+                    $('input[name=other]').val(d.data.other);
+                    $('input[name=zipcode]').val(d.data.zipcode);
+                }
+            })
+        }
+        $('#add-address-box').show();
+        $('#address-box').hide();
+    }
+    function loadaddress(){
+        $('#address-box .d_l_li').html('<div class="mui-loading"> <div class="mui-spinner"></div></div>');
+        $.getJSON("<?=appurl('user','addresslistjson')?>",function(d){
+            if(d.id==1){
+                var ahtml='';
+                dlarr=d.data;
+                for(var o in dlarr){
+                    ahtml+='<div class="mui-card addli_'+dlarr[o].id+'">'+
+                        '<div class="mui-card-header">'+
+                        '<span class="a_name">'+dlarr[o].name+'</span> | <span class="a_phone">'+dlarr[o].phone+'</span>'+
+                        '</div>'+
+                        '<div class="mui-card-content">'+
+                        '<div class="mui-card-content-inner">'+dlarr[o].province+dlarr[o].city+dlarr[o].district+dlarr[o].other+dlarr[o].zipcode+'</div>'+
+                        '</div>'+
+                        '<div class="mui-card-footer">'+
+                        '<span class="mui-card-link ad-edit" data-id="'+dlarr[o].id+'"><span class="mui-icon mui-icon-compose"></span>编辑</span>'+
+                        '<span class="mui-card-link ad-del" data-id="'+dlarr[o].id+'"><span class="mui-icon mui-icon-trash"></span>删除</span>'+
+                        '</div>'+
+                        '</div>';
+                }
+                $('#address-box .d_l_li').html(ahtml);
+                $('.ad-edit').on('tap',function(e){
+                    showaddadbox($(this).data('id'));
+                    e.stopPropagation();
+                })
+                $('.ad-del').on('tap',function(e){
+                    var adid=$(this).data('id');
+                    $.getJSON("<?=appurl('user','deladdress')?>",{id:adid},function(d){
+                        if(d.id==1){
+                            $('.addli_'+adid).remove();
+                        }else{
+                            mui.alert(d.msg);
+                        }
+                    })
+                    e.stopPropagation();
+                })
+            }else{
+                $('#address-box .d_l_li').html('');
+            }
+        })
+        $('#address-box').show();
+    }
+</script>
+<?php
+include('common/footer.html');
+?>

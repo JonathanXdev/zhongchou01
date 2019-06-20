@@ -1,0 +1,186 @@
+<?php
+include('common/header.html');
+?>
+<style>
+    .theme-box{
+        float: right;
+        width: 65%;
+        padding-left: 0;
+        margin-bottom: 0;
+        border: 0;
+        margin: 1.2rem 0;
+    }
+    .theme-box>div{
+        width:12%;
+    }
+    .theme-box .c-box{
+        display: block;
+        width: 1.4rem;
+        height: 1.4rem;
+        background: #000;
+        border: 1px solid #ddd;
+        position: relative;
+    }
+    .theme-box .c-box.active{
+        border: 2px solid #33d3c0;
+    }
+    .my-navigate-right {
+        height: 40px;
+        line-height: 41px;
+    }
+    .my-navigate-right:after {
+        right: 15px;
+        content: '\e583';
+        position: absolute;
+        top: 50%;
+        display: inline-block;
+        font-family: Muiicons;
+        font-size: inherit;
+        line-height: 1;
+        color: #bbb;
+        text-decoration: none;
+        -webkit-transform: translateY(-50%);
+        transform: translateY(-50%);
+        -webkit-font-smoothing: antialiased;
+    }
+</style>
+<div class="mui-content page-crowd-union-enter">
+    <div class="m_document" style="margin-bottom: 4rem;">
+        <div class="mui-slider" style="height: 20rem;">
+            <div class="mui-slider-group">
+                <?php if($crowd['coverimg']!=''):$coverimg=json_decode($crowd['coverimg'],true);foreach($coverimg as $cimg): ?>
+                <div class="mui-slider-item"><a href="#"><img src="<?=$_W['attachurl'].$cimg?>" /></a></div>
+                <?php endforeach;endif;?>
+            </div>
+            <?php
+            $time=time();
+            if($crowd['starttime']<=$time && $crowd['endtime']>=$time){
+                $stcls='ing';
+                $sttit='进行中';
+                $djstime=$crowd['endtime'];
+                $djstit='后结束';
+            }else if($crowd['starttime']>$time){
+                $stcls='nostart';
+                $sttit='未开始';
+                $djstime=$crowd['starttime'];
+                $djstit='后开始';
+            }else if($crowd['endtime']<$time){
+                $stcls='end';
+                $sttit='已结束';
+                $djstime=0;
+                $djstit='已结束';
+            }
+            ?>
+            <span class="crowd_status <?=$stcls?>"><?=$sttit?></span>
+        </div>
+        <div class="crowd_single">
+            <div class="crowd_single">
+                <div class="single-r1">
+                    <span>众筹时间：<span class="single-r1-span c_timer" data-dt="<?=$djstime?>"></span><?=$djstit?></span>
+                </div>
+                <div class="single-t">
+                    <h4><?=$crowd['title']?></h4>
+                </div>
+                <div class="single-txt clearfix">
+                    <p class="mui-h6 mui-ellipsis">
+                        <?php if($crowd['bmstatus']=='0'): ?>
+                        此联合众筹报名无需审核，报名后即可直接分享给好友筹款哦！
+                        <?php elseif($crowd['bmstatus']=='1'): ?>
+                        此联合众筹报名后需发起人审核通过后方可开始筹款，报名后请关注审核情况哦！
+                        <?php endif;?>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="crowd_detail">
+            <form class="mui-input-group" id="unionform" action="<?=appurl('crowd','subunion','crowd_id='.$crowd['id'])?>">
+                <?php if(!empty($teamarr) && $crowd['team']>0):?>
+                <div class="mui-input-row">
+                    <label>选择队伍</label>
+                    <input type="hidden" value="<?=@$team_id>0?$team_id:''?>" name="team_id">
+                    <div class="my-navigate-right m-ipt-txt" id="showCrowdTeam"><?=@$team_id==''?'请选择':$ckv[$team_id]?></div>
+                </div>
+                <script>
+                    var teamarr=<?=$teams?>;
+                    <?php if($crowd['team']==2): ?>
+                    teamarr.push({value:'0',text:'创建队伍'});
+                    <?php endif;?>
+                    $(function () {
+                        mui.init();
+                        var teamPicker = new mui.PopPicker();
+                        teamPicker.setData(teamarr);
+                        $('#showCrowdTeam').on('tap', function(event) {
+                            var that=$(this);
+                            teamPicker.show(function(items) {
+                                if(items[0]['value']==0){
+                                    window.location.href="<?=appurl('crowd','team','crowd_id='.$crowd['id'])?>";
+                                    return;
+                                }
+                                that.html(items[0]['text']);
+                                $('input[name=team_id]').val(items[0]['value']);
+                            });
+                        });
+                    })
+                </script>
+                <?php endif;?>
+                <div class="mui-input-row">
+                    <label>真实姓名</label>
+                    <input name="realname"  value="<?=$user['name']?>" type="text" class="mui-input-clear" placeholder="请输入真实姓名" data-input-clear="12"><span class="mui-icon mui-icon-clear mui-hidden"></span>
+                </div>
+                <div class="mui-input-row">
+                    <label>手机号码</label>
+                    <input name="phone" type="text" value="<?=$user['phone']?>" class="mui-input-clear" placeholder="请输入手机号码" data-input-clear="12"><span class="mui-icon mui-icon-clear mui-hidden"></span>
+                </div>
+                <div class="mui-input-row" style="height: auto">
+                    <textarea name="summary" rows="5" placeholder="口号，帮助您筹更多"></textarea>
+                </div>
+                <div class="mui-input-row">
+                    <label>选择风格</label>
+                    <input name="theme" type="hidden" value="0">
+                    <div class="mui-row theme-box">
+                        <div class="mui-col-sm-1 mui-col-xs-1"><span class="c-box sls-theme active" data-id="0" data-c="#0A0A2A"></span></div>
+                        <div class="mui-col-sm-1 mui-col-xs-1"><span class="c-box sls-theme" data-id="1" data-c="#DF0101" style="background: #DF0101"></span></div>
+                        <div class="mui-col-sm-1 mui-col-xs-1"><span class="c-box sls-theme" data-id="2" data-c="#31B404" style="background: #31B404"></span></div>
+                        <div class="mui-col-sm-1 mui-col-xs-1"><span class="c-box sls-theme" data-id="3" data-c="#6A0888" style="background: #6A0888"></span></div>
+                        <div class="mui-col-sm-1 mui-col-xs-1"><span class="c-box sls-theme" data-id="4" data-c="#FF8000" style="background: #FF8000"></span></div>
+                        <div class="mui-col-sm-1 mui-col-xs-1"><span class="c-box sls-theme" data-id="5" data-c="#000000" style="background: #000000"></span></div>
+                        <div class="mui-col-sm-1 mui-col-xs-1"><span class="c-box sls-theme" data-id="6" data-c="#DF3A01" style="background: #DF3A01"></span></div>
+                        <div class="mui-col-sm-1 mui-col-xs-1"><span class="c-box sls-theme" data-id="7" data-c="#2E2E2E" style="background: #2E2E2E"></span></div>
+                    </div>
+                </div>
+                <div class="mui-button-row">
+                    <button type="button" class="mui-btn mui-btn-primary sub-union" data-pay="0">报名筹款</button>&nbsp;&nbsp;<button type="button" class="mui-btn mui-btn-warning sub-union" data-pay="1">报名并付款</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function(){
+        leftTimer('.c_timer');
+        $('.sub-union').on('tap',function(){
+            var ntp=$(this).data('pay');
+            $.post($('#unionform').attr('action'),$('#unionform').serialize(),function(d){
+                if(d.id==1){
+                    if(ntp=='1'){
+                        location.href="<?=appurl('crowd','paydft','crowd_id='.$crowd['id'])?>&ntp=1&union_id="+d.data;
+                    }else{
+                        location.href='<?=appurl('crowd','uniondetail')?>&union_id='+d.data;
+                    }
+                }else{
+                    mui.alert(d.msg);
+                }
+            },'json')
+        });
+
+        $('.sls-theme').on('click',function(){
+            $('.sls-theme').removeClass('active');
+            $(this).addClass('active');
+            $('input[name=theme]').val($(this).data('id')+'|'+$(this).data('c'));
+        })
+    });
+</script>
+<?php
+include('common/footer.html');
+?>

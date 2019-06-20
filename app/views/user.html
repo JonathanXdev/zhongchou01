@@ -1,0 +1,79 @@
+<?php
+include('common/header.html');
+?>
+<style>
+
+</style>
+<div class="mui-content user-home" style="padding-bottom:7rem">
+    <div class="top-face">
+        <div class="f-avatar"><img src="<?=@$user['avatar']!=''?$user['avatar']:(@$w['fans']['tag']['avatar']==''?MODULE_URL.'app/views/img/timg.jpg':$w['fans']['tag']['avatar'])?>" width="100%"></div>
+        <div class="f-att">
+            <span class="f-nick"><?=@$user['name']!=''?$user['name']:(@$w['fans']['tag']['nickname']==''?'匿名':$w['fans']['tag']['nickname'])?>(UID:<?=$w['member']['uid']?>)</span>
+            <span class="f-cc">远处的曙光正在向你招手...</span>
+        </div>
+    </div>
+    <div class="yh_nav_top">
+        <ul class="mui-table-view mui-grid-view mui-grid-9 top-c-m">
+            <li class="mui-table-view-cell mui-media mui-col-xs-3 mui-col-sm-3 jump_url" data-href="<?=appurl('user','order')?>">
+                <span class="mui-icon iconfont icon-quanbudingdan"></span>
+                <div class="mui-media-body"><span class="f_t_txt">我的订单</span></div>
+            </li>
+            <li class="mui-table-view-cell mui-media mui-col-xs-3 mui-col-sm-3 jump_url" data-href="<?=appurl('user','useraddress')?>">
+                <span class="mui-icon iconfont icon-31daishouhuo"></span>
+                <div class="mui-media-body"><span class="f_t_txt">地址管理</span></div>
+            </li>
+            <li class="mui-table-view-cell mui-media mui-col-xs-3 mui-col-sm-3 jump_url" data-href="<?=appurl('crowd','myunion')?>">
+                <span class="mui-icon iconfont icon-shoucang"></span>
+                <div class="mui-media-body"><span class="f_t_txt">我的报名</span></div>
+            </li>
+            <li class="mui-table-view-cell mui-media mui-col-xs-3 mui-col-sm-3 jump_url" data-href="<?=appurl('mycrowd','index')?>">
+                <span class="mui-icon iconfont icon-jindianzi"></span>
+                <div class="mui-media-body"><span class="f_t_txt">我的发起</span></div>
+            </li>
+        </ul>
+    </div>
+    <ul class="mui-table-view mui-table-view-chevron">
+        <li class="mui-table-view-cell jump_url" data-href="<?=appurl('user','useredit','ff=df')?>">
+            <span class="mui-navigate-right">个人信息</span>
+        </li>
+        <li class="mui-table-view-cell jump_url" data-href="<?=appurl('user','useredit','ff=phone')?>">
+            <a href="javascript:;" class="mui-navigate-right"><span class="mui-badge mui-badge-danger"><?=$user['phone']!='' && $user['phoneak']=='1'?'已验证':'去验证'?></span> 验证手机</a>
+        </li>
+    </ul>
+    <ul class="mui-table-view mui-table-view-chevron">
+        <li class="mui-table-view-cell jump_url" data-href="<?=appurl('user','collect')?>">
+            <a href="javascript:;" class="mui-navigate-right">
+                <span class="">我的收藏</span>
+            </a>
+        </li>
+        <li class="mui-table-view-cell jump_url" data-href="<?=appurl('user','msg')?>">
+            <a href="javascript:;" class="mui-navigate-right">
+            <span class="">消息中心</span><span class="mui-badge mui-badge-danger"><?=msgcount()?></span>
+            </a>
+        </li>
+    </ul>
+    <ul class="mui-table-view mui-table-view-chevron">
+        <li class="mui-table-view-cell jump_url" data-href="<?=appurl('user','help')?>">
+            <span class="mui-navigate-right">帮助中心</span>
+        </li>
+        <li class="mui-table-view-cell jump_url" data-href="<?=appurl('home','about')?>">
+            <span class="mui-navigate-right">关于我们</span>
+        </li>
+        <li class="mui-table-view-cell jump_url" data-href="<?=appurl('home','about')?>">
+            <span class="mui-navigate-right">意见反馈</span>
+        </li>
+    </ul>
+</div>
+<?php
+include('common/bottom.html');
+?>
+<script>
+    $(function(){
+        $('.start-crowd').on('click',function(){
+            mui.alert('暂不支持自助发起，请联系客服协助发起众筹');
+        })
+    })
+</script>
+<?php
+include('common/footer.html');
+?>

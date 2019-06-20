@@ -1,0 +1,282 @@
+<div class="page-title">
+    <div class="page-breadcrumb">
+        <ol class="breadcrumb">
+            <li><a href="<?=weburl('home','index')?>">首页</a></li>
+            <li class="active">众筹审核[<?=$crowd['crowd_info']['title']?>]</li>
+        </ol>
+    </div>
+</div>
+<div id="main-wrapper">
+    <div class="row">
+        <div class="panel panel-dark">
+            <div class="panel-heading clearfix">
+                <h3 class="panel-title">审核</h3>
+            </div>
+            <div class="panel-body">
+                <div class="tabs-left" role="tabpanel">
+                    <ul class="nav nav-tabs col-md-3" role="tablist" style="padding: 0;">
+                        <li role="presentation" class="active"><a href="#tab9" role="tab" data-toggle="tab">基本信息</a></li>
+                        <li role="presentation"><a href="#tab10" role="tab" data-toggle="tab">项目信息</a></li>
+                        <?php if($crowd['ntype']=='0'):?>
+                        <li role="presentation"><a href="#tab11" role="tab" data-toggle="tab">回报项</a></li>
+                        <?php endif;?>
+                        <li role="presentation"><a href="#tab12" role="tab" data-toggle="tab">项目描述</a></li>
+                    </ul>
+                    <!-- Tab panes -->
+                    <div class="tab-content col-md-8">
+                        <div role="tabpanel" class="tab-pane active fade in" id="tab9">
+                            <div class="panel panel-white">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">基础信息</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <table class="table">
+                                        <tbody>
+                                        <tr>
+                                            <td>类目</td>
+                                            <td><?=$crowd['category']['name']?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>类型</td>
+                                            <td><?=$crowd['default_info']['ntype']=='0'?'普通':'联合'?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>发起人身份</td>
+                                            <td><?=$crowd['default_info']['nfrom']=='1'?'个人':'企业/机构'?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>区域</td>
+                                            <td><?=$crowd['city']['a1name'].' '.$crowd['city']['a2name'].' '.$crowd['city']['a3name']?></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="panel panel-white">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">资质/证明</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <table class="table">
+                                        <tbody>
+                                        <?php foreach(json_decode($crowd['default_info']['auth'],true) as $auth):?>
+                                        <tr>
+                                            <td><?=$auth['name']?></td>
+                                            <td><img src="<?=tomedia($auth['img'])?>" width="100"></td>
+                                        </tr>
+                                        <?php endforeach;?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane fade" id="tab10">
+                            <div class="panel panel-white">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">资质/证明</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <table class="table">
+                                        <tbody>
+                                        <tr>
+                                            <td>期望开始时间</td>
+                                            <td><?=date('Y-m-d H:i:s',$crowd['crowd_info']['starttime'])?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>期望结束时间</td>
+                                            <td><?=date('Y-m-d H:i:s',$crowd['crowd_info']['endtime'])?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>封面</td>
+                                            <td class="row">
+                                                <?php foreach(json_decode($crowd['crowd_info']['coverimg'],true) as $coverimg):?>
+                                                <img class="col-md-4" src="<?=tomedia($auth['img'])?>">
+                                                <?php endforeach;?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>标题</td>
+                                            <td><?=$crowd['crowd_info']['title']?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>筹集金额</td>
+                                            <td><?=$crowd['crowd_info']['money']?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>筹款目的</td>
+                                            <td><?=$crowd['crowd_info']['summary']?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>标签</td>
+                                            <td>
+                                                <?php foreach(json_decode($crowd['crowd_info']['tags'],true) as $tags):?>
+                                                <span class="label label-primary"><?=$tags?></span>
+                                                <?php endforeach;?>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <?php if($crowd['ntype']=='0'):?>
+                        <div role="tabpanel" class="tab-pane fade" id="tab11">
+                            <?php foreach($crowd['crowd_reward'] as $reward):?>
+                            <div class="panel panel-green">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title"><?=$reward['reward_title']?></h3>
+                                </div>
+                                <div class="panel-body">
+                                    <table class="table">
+                                        <tbody>
+                                        <tr>
+                                            <td>回报类型</td>
+                                            <td><?=$reward['reward_type']=='0'?'实物':'虚拟'?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>支持金额</td>
+                                            <td><?=$reward['reward_money']?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>内容</td>
+                                            <td><?=$reward['reward_content']?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>回报数量</td>
+                                            <td><?=$reward['reward_limit']?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>支持数/人</td>
+                                            <td><?=$reward['reward_marknum']?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>回报天数</td>
+                                            <td><?=$reward['reward_day']?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>需要字段</td>
+                                            <td class="row">
+                                                <?php
+                                                $fdarr=unserialize($reward['reward_fd']);
+                                                if(!empty($fdarr)):
+                                                foreach($fdarr as $reward_fd):?>
+                                                <div class="col-md-4">
+                                                    <?=$reward_fd?>
+                                                </div>
+                                                <?php endforeach;endif;?>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <?php endforeach;?>
+                        </div>
+                        <?php endif;?>
+                        <div role="tabpanel" class="tab-pane fade" id="tab12">
+                            <?=@$crowd['crowd_content']?>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="pull-left col-md-offset-2">
+            <span class="btn btn-warning crowd-reply" data-toggle="modal" data-target=".check-reply-md"><i class="fa fa-reply m-r-xs"></i>退回</span>
+            <span class="btn btn-danger crowd-pass" data-toggle="modal" data-target=".check-pass-md"><i class="fa fa-gavel m-r-xs"></i>不予通过</span>
+        </div>
+        <div class="pull-left col-md-offset-2">
+            <span class="btn btn-success crowd-ok" data-toggle="modal" data-target=".check-ok-md"><i class="fa fa-check m-r-xs"></i>通过</span>
+        </div>
+    </div>
+</div>
+<div class="modal fade check-ok-md" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">确认审核通过</h4>
+            </div>
+            <div class="modal-body">
+                <p>审核通过后，改众筹项目将进入编辑模式，并进入众筹列表，但并不会上线，请知晓！</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success ok-sub">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade check-reply-md" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">确认退回吗？</h4>
+            </div>
+            <div class="modal-body">
+                <p>退回后，发起人将可以继续编辑/修改该众筹项目，修改完成后可以继续提交审核。</p>
+                <p>请在下方输入退回理由！</p>
+                <textarea name="reply-msg" class="form-control"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success reply-sub">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade check-pass-md" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">对该众筹项目不予通过吗？</h4>
+            </div>
+            <div class="modal-body">
+                <p>不予通过的众筹项目，发起人将不能继续编辑/提交审核，但是可以删除，请确认操作！</p>
+                <p>请在下方输入不予通过的理由！</p>
+                <textarea name="pass-msg" class="form-control"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success pass-sub">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+var c_c_id=<?=$crowd['id']?>;
+</script>
+<script type="text/javascript" src="<?=weburl('crowd','citydata')?>"></script>
+<script>
+$(function(){
+    $('.reply-sub').on('click',function(){
+        dopost('reply',$('textarea[name=reply-msg]').val(),function(){
+            history.go(-1);
+        })
+    })
+    $('.ok-sub').on('click',function(){
+        dopost('ok','',function(d){
+            setTimeout(function(){
+                location.href='<?=weburl('crowd','start','ff=1')?>&type='+d.ntype+'&id='+d.id;
+            },2000)
+        })
+    })
+    $('.pass-sub').on('click',function(){
+        dopost('pass',$('textarea[name=pass-msg]').val(),function(){
+            history.go(-1);
+        })
+    })
+})
+    function dopost(vdo,msg,func){
+        $.post('<?=weburl("crowd","subcheck")?>',{id:c_c_id,vdo:vdo,msg:msg},function(d){
+            if(d.id==1){
+                func(d.data);
+                toastr.success(d.msg);
+            }else{
+                toastr.info(d.msg);
+            }
+        },'json');
+    }
+</script>

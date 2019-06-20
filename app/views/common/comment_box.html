@@ -1,0 +1,208 @@
+<style>
+    .cmt_box{
+        position: fixed;
+        bottom: 50px;
+        width: 100%;
+        z-index: 999;
+        overflow: scroll;
+        top: 50px;
+        margin: auto;
+        max-width: 600px;
+        left: 0;
+        right: 0;
+    }
+    .cmt_content{
+        border: none;
+        background: #f2f2f2;
+        margin: 0;
+    }
+    .cmt_sub{
+        width: 10rem!important;
+        padding: .4rem 0!important;
+    }
+    .cmt_cmt{
+        white-space: normal!important;
+    }
+    .cmt_avatar{
+        border-radius: 3rem;
+    }
+    .cmt_znum{
+        position: absolute;
+        right: 12px;
+        bottom: 3rem;
+        font-size: 12px;
+        color: #555;
+    }
+    .cmt_bg{
+        background: #000;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        opacity: .6;
+    }
+    .cmt_ipt{
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        left: 0;
+        right: 0;
+        padding: 5px;
+        background: #fff;
+    }
+</style>
+<i class="icon iconfont icon-31pinglun tg-cmt-ipt" style="
+    right: 10px;
+    position: fixed;
+    bottom: 6rem;
+    font-size: 3rem;
+    background: #33d3c0;
+    color: #fff;
+    border-radius: 5rem;
+    width: 5rem;
+    height: 5rem;
+    line-height: 5rem;
+    text-align: center;
+    opacity: 0.8;
+    z-index: 1;
+"></i>
+<div class="mui-input-row cmt_box" style="display: none">
+    <div class="cmt_bg hide-cmt"></div>
+    <div class="cmt_ipt">
+        <input type="hidden" value="0" name="cmt_uid">
+        <input type="hidden" value="" class="cmt_nick">
+        <input type="hidden" value="0" name="cmt_pid">
+        <textarea autofocus="autofocus" class="cmt_content" name="cmt_content" rows="2" placeholder="请输入"></textarea>
+        <p class="cmt_znum">0/64</p>
+        <button class="mui-btn cmt_sub">发表</button>
+    </div>
+</div>
+<div class="cmt_list">
+    <ul class="mui-table-view c-b-l">
+    </ul>
+</div>
+<script>
+    var cmtpage=1;
+    var cmtlimit=10;
+    var cmtlock=0;
+    var from_id='<?=@$from_id==''?'':$from_id?>';
+    var vfrom='<?=@$vfrom==''?'':$vfrom?>';
+    function getScrollTop() {
+        var scrollTop = 0;
+        if(document.documentElement && document.documentElement.scrollTop) {
+            scrollTop = document.documentElement.scrollTop;
+        } else if(document.body) {
+            scrollTop = document.body.scrollTop;
+        }
+        return scrollTop;
+    }
+    $(function(){
+        $('.hide-cmt').on('tap',function () {
+            $(this).parent().hide();
+            $('input[name=cmt_uid]').val(0);
+            $('input[name=cmt_pid]').val(0);
+            $('.cmt_nick').val('');
+            $('.cmt_content').attr('placeholder','回复');
+        });
+        $('.tg-cmt-ipt').on('tap',function () {
+            $('.cmt_box').show();
+        });
+        getcmtlist();
+        $('.cmt_sub').on('tap',function(){
+            var cmt_uid=$('input[name=cmt_uid]').val();
+            var cmt_pid=$('input[name=cmt_pid]').val();
+            var cmt_nick=$('.cmt_nick').val();
+            var cmt_content=$('.cmt_content').val();
+            $.post('<?=appurl("comments","addcmt")?>',{puid:cmt_uid,pid:cmt_pid,content:cmt_content,from_id:from_id,vfrom:vfrom},function(d){
+                if(d.id==1){
+                    var chtml='';
+                    chtml+='<li class="mui-table-view-cell mui-media" data-id="'+d.data.id+'">' +
+                        '<a href="javascript:;" class="">' +
+                        '<img class="mui-media-object mui-pull-left cmt_avatar" src="'+(d.data.avatar==''?'<?=MODULE_URL.'app/views/img/timg.jpg'?>':(d.data.avatar))+'">' +
+                        '<div class="mui-media-body">' +
+                    '<span class="nk">'+(d.data.nickname=='' || !d.data.nickname?'匿名用户':d.data.nickname)+'</span>';
+                    if(cmt_pid!=0){
+                        chtml+=' 回复 <span class="nk">'+cmt_nick+'</span>' ;
+                    }
+                    chtml+='<p class="cmt_cmt">'+cmt_content+'</p>' +
+                        '<div class="mui-text-right">' +
+                        '<span class="mui-h5">'+timeago(d.data.addtime)+'</span>' +
+                        '</div>' +
+                        '</div>' +
+                        '</a>' +
+                        '</li>';
+                    $('.cmt_list .c-b-l').prepend(chtml);
+                    $('.cmt_content').val('');
+                    $('input[name=cmt_uid]').val('');
+                    $('input[name=cmt_pid]').val('');
+                    $('.cmt_nick').val('');
+
+                }else{
+                    mui.alert(d.msg);
+                }
+            },'json')
+        });
+        $('.cmt_content').on('keyup',function(){
+            var tval=$(this).val();
+            var lthnum=tval.length;
+            if(lthnum>64){
+                $(this).val(tval.substr(0,64));
+            }
+            $('.cmt_znum').html(lthnum+'/64');
+        });
+        $('.mui-content').scroll(function(){
+            console.log($('.cmt_list').height()-$(this).scrollTop() - getScrollTop());
+            if ($('.cmt_list').height()-$(this).scrollTop()<250){
+
+                getcmtlist()
+            }
+        });
+    });
+    function getcmtlist(){
+        if(cmtlock==1){
+            return;
+        }else{
+            cmtlock=1;
+        }
+        var pdata={page:cmtpage,limit:cmtlimit};
+        pdata.from_id=from_id;
+        $('.cmt_list').append('<div class="mui-loading"><div class="mui-spinner"></div></div>');
+        $.getJSON('<?=appurl("comments","getcmt")?>',pdata,function(d){
+            if(d.id==1){
+                var vhtml='';
+                var dd=d.data;
+                for(var o in dd){
+                    vhtml+='<li class="mui-table-view-cell mui-media re-cmt-open" data-id="'+dd[o].id+'" data-nick="'+(dd[o].nickname==''?'匿名用户':dd[o].nickname)+'">' +
+                        '<a href="javascript:;" class="">' +
+                        '<img class="mui-media-object mui-pull-left cmt_avatar" src="'+dd[o].avatar+'">' +
+                        '<div class="mui-media-body">' +
+                    '<span class="nk">'+(dd[o].nickname==''?'匿名用户':dd[o].nickname)+(dd[o].verify=='-1' || dd[o].verify=='0'?' <span class="mui-badge mui-badge-primary">审核中</span>':'')+'</span>' ;
+                        if(dd[o].fuid){
+                            vhtml+=' 回复 <span class="nk">'+(dd[o].fnickname==''?'匿名用户':dd[o].fnickname)+'</span>' ;
+                        }
+                        vhtml+='<p class="cmt_cmt">'+dd[o].content+'</p>' +
+                        '<div class="mui-text-right">' +
+                        '<span class="mui-h5">'+timeago(dd[o].addtime)+'</span>' +
+                        '</div>' +
+                        '</div>' +
+                        '</a>' +
+                        '</li>';
+                }
+                $('.cmt_list .c-b-l').append(vhtml);
+                $('.re-cmt-open').on('tap',function () {
+                    $('input[name=cmt_pid]').val($(this).data('id'));
+                    $('.cmt_nick').val($(this).data('nick'));
+                    $('.cmt_box').show();
+                    $('.cmt_content').attr('placeholder','回复'+$(this).data('nick')).text('');
+                });
+                cmtpage++;
+                cmtlock=0;
+            }else{
+                cmtlock=1;
+                $('.cmt_list').append('<div class="flow-more"><a href="javascript:;">没有啦！</a></div>');
+            }
+            $('.cmt_list').find('.mui-loading').remove();
+        });
+    }
+</script>

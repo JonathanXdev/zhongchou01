@@ -1,0 +1,186 @@
+<div class="page-title">
+    <div class="page-breadcrumb">
+        <ol class="breadcrumb">
+            <li><a href="<?=weburl('home','index')?>">首页</a></li>
+            <li class="active">个性化设置</li>
+        </ol>
+    </div>
+</div>
+<div id="main-wrapper">
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="<?=($mf=='slide' || $mf=='')?'active':''?>"><a href="<?=weburl('system','layout','mf=slide')?>">首页幻灯片</a></li>
+        <li class="<?=$mf=='homenav'?'active':''?>"><a href="<?=weburl('system','layout','mf=homenav')?>">首页导航设置</a></li>
+    </ul>
+    <div class="row">
+        <?php if($mf=='slide' || $mf==''):?>
+        <div class="col-md-6">
+            <div class="panel panel-white">
+                <div class="panel-heading clearfix">
+                    <h4 class="panel-title">微信首页幻灯片</h4>
+                </div>
+                <div class="panel-body">
+                    <form class="form-horizontal" id="system-wx-slide" action="<?=weburl('system','wxslide')?>" method="post">
+                        <?php
+                        $facenum=0;
+                        $facearr=@json_decode($system['face'],true);
+                        if(@is_array($facearr)):foreach($facearr as $face):
+                        $facenum++;
+                        ?>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">上传图片</label>
+                            <div class="col-sm-10">
+                                <?=@tpl_form_field_image('img[]',$face['img'],array('global' => false,'dest_dir' => 'yh_zhongchou/face', 'extras' => array('image'=> ' width="32" ')));?>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">链接</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="link[]" value="<?=$face['link']?>" class="form-control">
+                            </div>
+                        </div>
+                        <?php endforeach;endif;
+                        for($f=0;$f<6-$facenum;$f++):?>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">上传图片</label>
+                            <div class="col-sm-10">
+                                <?=@tpl_form_field_image('img[]','','', array('dest_dir' => 'yh_zhongchou/face','global' => false, 'extras' => array('image'=> ' width="32" ')));?>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">链接</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="link[]" value="" class="form-control">
+                            </div>
+                        </div>
+                        <?php endfor; ?>
+                        <button type="button" class="btn btn-success btn-lg sub-face-img" style="float:right">提交</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <?php endif;?>
+        <?php if($mf=='homenav'):?>
+        <div class="col-md-6" style="width: 600px">
+            <div class="panel panel-white">
+            <div class="panel-heading clearfix">
+                <h4 class="panel-title">首页导航设置</h4>
+            </div>
+            <div class="panel-body">
+                <?php
+                        $homenavarr=@unserialize($system['homenav']);
+                    ?>
+                <form class="form-horizontal" id="system-homenav" action="<?=weburl('system','homenav')?>" method="post">
+                    <div class="row">
+                        <?php  if(!empty($homenavarr)):foreach($homenavarr as $k=>$h):?>
+                        <div class="col-md-3 m-b-xs">
+                            <span class="rm-nav" data-k="<?=$k?>" data-original-title="移除"><i class="icon-close"></i></span>
+                            <div class="sidebar-profile open-set-layout-md" data-k="<?=$k?>">
+                                <input type="hidden" name="sort[]" value="<?=$h['sort']?>" class="sort-ipt">
+                                <input type="hidden" name="link[]" value="<?=$h['link']?>" class="link-ipt">
+                                <input type="hidden" name="title[]" value="<?=$h['title']?>" class="title-ipt">
+                                <input type="hidden" name="icon[]" value="<?=$h['icon']?>" class="icon-ipt">
+                                <div class="sidebar-profile-image">
+                                    <img src="<?=tomedia($h['icon'])?>" class="img-circle img-responsive" alt="">
+                                </div>
+                                <div class="sidebar-profile-details">
+                                    <span><small><?=$h['title']?></small></span>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach;endif;?>
+                    </div>
+                </form>
+                <div class="clearfix"></div>
+                <button class="btn btn-primary btn-addon btn-sm open-set-layout-md" data-k="" style="float: right"><i class="fa fa-plus"></i> 新增</button>
+            </div>
+        </div>
+        </div>
+        <?php endif;?>
+    </div>
+</div>
+<div class="modal fade set-layout-md" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="myModalLabel">设置首页导航</h4>
+            </div>
+            <div class="modal-body">
+                <form id="homenav-form" action="<?=weburl('system','addhomenav')?>">
+                <div class="form-group">
+                    <label for="">排序</label>
+                    <input type="number" name="setsort" class="form-control" placeholder="排序">
+                </div>
+                <div class="form-group">
+                    <label for="">标题文字</label>
+                    <div class="input-group">
+                        <input type="text" name="settitle" class="form-control" aria-label="...">
+                        <div class="input-group-btn open">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="true">选择众筹分类 <span class="caret"></span></button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                <?php if(is_array($crowdcate)):foreach($crowdcate as $c):?>
+                                <li class="sls-cate" data-img="<?=$c['icon']?>" data-link="<?=appurl('crowd','index','cid='.$c['id'])?>"><a href="#"><?=$c['name']?></a></li>
+                                <?php endforeach;endif;?>
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group set-icon-img">
+                    <label for="">图标图片</label>
+                    <?=@tpl_form_field_image('seticon','','',array('global' => false,'dest_dir' => 'yh_zhongchou/face', 'extras' => array('image'=> ' width="32" ')));?>
+                </div>
+                <div class="form-group">
+                    <label for="">链接</label>
+                    <input type="text" name="setlink" class="form-control" placeholder="导航链接">
+                </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button class="btn btn-success sub-homenav">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+        $('.rm-nav').on('click',function () {
+            var keys=$(this).data('k');
+            $.getJSON("<?=weburl('system','rmhomenav')?>",{keys:keys},function (d) {
+                if(d.id==1){
+                    location.reload();
+                }else{
+                    toastr.info(data.msg)
+                }
+            });
+        });
+        $('.open-set-layout-md').on('click',function () {
+            var keys=$(this).data('k');
+            if(keys!==''){
+                $('input[name=setsort]').val($(this).find('.sort-ipt').val());
+                $('input[name=settitle]').val($(this).find('.title-ipt').val());
+                $('input[name=seticon]').val($(this).find('.icon-ipt').val());
+                $('.set-icon-img .img-thumbnail').attr('src',window.sysinfo.attachurl+$(this).find('.icon-ipt').val());
+                $('input[name=setlink]').val($(this).find('.link-ipt').val());
+            }
+
+            $('.set-layout-md').modal('show');
+            $('.sub-homenav').unbind('click').on('click',function () {
+                $.post($('#homenav-form').attr('action')+'&keys='+keys,$('#homenav-form').serialize(),function (d) {
+                    if(d.id==1){
+                        location.reload();
+                    }else{
+                        toastr.info(data.msg)
+                    }
+                },'json')
+            });
+        });
+        $('.sls-cate').on('click',function () {
+            $('input[name=settitle]').val($(this).text());
+            $('input[name=seticon]').val($(this).data('img'));
+            $('.set-icon-img .img-thumbnail').attr('src',window.sysinfo.attachurl+$(this).data('img'));
+            $('input[name=setlink]').val($(this).data('link'));
+        })
+    })
+</script>

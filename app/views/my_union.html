@@ -1,0 +1,241 @@
+<?php
+include('common/header.html');
+?>
+<style>
+    .crowd-li{
+        padding: 8px;
+        background: #fff;
+        position: relative;
+        height: 106px;
+    }
+    .crowd-li:after{
+        content: '';
+        height: 1px;
+        background: #ebebeb;
+        position: absolute;
+        bottom: 0;
+        left: 3px;
+        right: 3px;
+        margin: auto;
+    }
+    .crowd-thumb {
+        max-width: 80px;
+        height: 80px;
+        line-height: 80px;
+        position: relative;
+    }
+    .m-pro-box{
+        position: absolute;
+        bottom: 0;
+        left: 3px;
+        right: 3px;
+    }
+    .m-bg-img{
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        border-radius: 5px;
+        background-size: cover;
+        background-position: center;
+    }
+    .crowd-view{
+        padding-left: 5px;
+        position: absolute;
+        left: 90px;
+        top: 8px;
+        right: 3px;
+        height: 90px;
+    }
+    .m-tit{
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 3px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    .m-att{
+        margin-bottom:3px;
+    }
+    .m-tags a{
+        display: inline-block;
+        border: 1px solid;
+        border-radius: 10px;
+        color: #a3a3a3;
+        padding: 0 3px;
+        margin-right: 3px;
+    }
+    .m-i-info{
+        text-align: center;
+        background: #fdfdfd;
+    }
+    .m-i-info .m-fore{
+        position: relative;
+    }
+    .m-i-info .m-fore:after{
+        content: '';
+        background: #ebebeb;
+        position: absolute;
+        bottom: 7px;
+        top: 7px;
+        right: 0;
+        margin: auto;
+        width: 1px;
+    }
+    .m-i-info .m-fore:last-child:after{
+        display: none;
+    }
+    .m-i-info p{
+        margin: 0;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    .m-top-tit{
+        font-size: 12px;
+        color:#666
+    }
+    .m-top-txt{
+        font-weight:bold;
+    }
+    .m-r-cd{
+        position: absolute;
+        right: 0;
+        top: 3px;
+        display: block;
+        padding: 0 3px;
+        background: #00a2ac;
+        color: #fff;
+        border-radius: 30px 0 0 30px;
+        height: 20px;
+        line-height: 20px;
+        font-size: 12px;
+    }
+    .m-p-end{
+        background: #d0d0d0;
+        z-index: 1;
+    }
+    .m-p-wait{
+        background: #69ac00;
+    }
+    .m-p-ing{
+        background: #ff0000;
+    }
+    .m-strong{
+        font-weight: bold;
+        color: #00a2ac;
+    }
+</style>
+<div class="mui-content page-crowd-list">
+    <div class="header mui-bar mui-bar-nav" style="height: 8rem;">
+        <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+        <h1 class="mui-title">我的报名</h1>
+        <div class="mui-segmented-control n_c_top mui-segmented-control-inverted mui-segmented-control-primary" style="margin: 0;top: -2px;font-size: 12px;font-weight: 100;">
+            <span class="mui-control-item fl-btn mui-active" data-fl="st" data-o="0">进行中</span>
+            <span class="mui-control-item fl-btn" data-fl="st" data-o="1">已成功</span>
+            <span class="mui-control-item fl-btn" data-fl="st" data-o="-1">已失败</span>
+        </div>
+    </div>
+    <div class="crowd-list" style="margin-top: 9rem;">
+
+    </div>
+    <div class="contact" style="text-align: center;padding: 3rem;">
+        <p class="f_t_txt">&copy;<?=@$sys['sysname']?$sys['sysname']:'亿恒众筹'?>版权所有</p>
+    </div>
+</div>Z
+<script>
+
+    var page=1;
+    var limit=10;
+    var lock=0;
+    var fl='st';
+    $(function(){
+        loadcrowd();
+        $('.mui-content').scroll(function(){
+            if ($('.m_document').height() -$(this).scrollTop() - $(this).height()<200){
+                loadcrowd();
+            }
+        });
+        $('.ct_btn').on('click',function(){
+            $('.ct_btn').removeClass('active');
+            $(this).addClass('active');
+            mui('#catelist').popover('hide');
+            page=1;
+            lock=0;
+            fl='';
+            $('.crowd-list').html('');
+            loadcrowd();
+        });
+        $('.fl-btn').on('tap',function(){
+            $('.fl-btn').removeClass('mui-active');
+            $(this).addClass('mui-active');
+            var od=$(this).data('o');
+            page=1;
+            lock=0;
+            $('.crowd-list').html('');
+            loadcrowd(od);
+        });
+    })
+    function loadcrowd(od){
+        if(lock==1){
+            return;
+        }else{
+            lock=1;
+        }
+        var pdata={page:page,limit:limit,st:od};
+        $('.crowd_list').append('<div class="mui-loading"><div class="mui-spinner"></div></div>');
+        $.getJSON("<?=appurl('crowd','myunionjson')?>",pdata,function(d){
+            if(d.id==1){
+                putcrowdlist(d.data);
+                lock=0;
+            }else{
+                lock=1;
+                $('.crowd-list').append('<div class="flow-more"><a href="javascript:;">没有更多啦！</a></div>');
+            }
+            $('.crowd-list').find('.mui-loading').remove();
+        })
+    }
+    function putcrowdlist(d){
+        var html='';
+        for(var o in d){
+            var nfromt='官方';
+            if(d[o].nfrom==2){
+                nfromt='企业/机构';
+            }else if(d[o].nfrom==1){
+                nfromt='个人';
+            }
+            var faceimgarr=eval("("+d[o].coverimg+")");
+            html+='<div class="crowd-li mui-table-view-cell crowd-id-5 jump_url_s" data-href="<?=appurl('crowd','uniondetail')?>&union_id='+d[o].union_id+'">' +
+                '<div class="crowd-thumb"><span class="m-bg-img" style="background-image: url(\''+(!faceimgarr?'':window.sysinfo.attachurl+faceimgarr[0])+'\')"></span></div>' +
+                ' <div class="crowd-view">' +
+                ' <dd class="m-tit">'+d[o].title+'</dd>' +
+                ' <dd class="m-att m-tags">发起时间<span class="">'+d[o].uaddtime+'</span></dd>' +
+                ' <dd class="m-att m-i-info mui-row">' +
+                ' <div class="m-fore mui-col-sm-3 mui-col-xs-3 ">' +
+                ' <p class="m-top-txt">'+d[o].pernum+'%</p>' +
+                ' <p class="m-top-tit">已达</p>' +
+                ' </div>' +
+                ' <div class="m-fore mui-col-sm-5 mui-col-xs-5">' +
+                ' <p class="m-top-txt">￥'+d[o].ucjmoney+'</p>' +
+                ' <p class="m-top-tit">已筹</p>' +
+                ' </div>' +
+                ' <div class="m-fore mui-col-sm-4 mui-col-xs-4">' +
+                ' <p class="m-top-txt">'+d[o].ppnum+'次</p>' +
+                ' <p class="m-top-tit">支持</p>' +
+                ' </div>' +
+                ' </dd>' +
+                ' </div>' +
+                ' </div>';
+        }
+        $('.crowd-list').append(html);
+        $('.jump_url_s').on('click',function(){
+            location.href=$(this).data('href');
+        })
+        page++;
+    }
+</script>
+
+<?php
+include('common/footer.html');
+?>

@@ -1,0 +1,207 @@
+<?php
+include('common/header.html');
+?>
+<style>
+    .crowd_li .mui-card-footer{
+        padding: 1rem 0;
+    }
+</style>
+<div class="mui-content page-home" style="position: relative">
+    <div class="m_document" style="margin-bottom: 4rem">
+        <div class="mui-slider home-slider" style="max-height: 200px;">
+            <div class="mui-slider-group mui-slider-loop">
+                <!--支持循环，需要重复图片节点-->
+                <?php
+                $facecount=0;
+                if(is_array($facearr)):$facecount=count($facearr);?>
+                <div class="mui-slider-item mui-slider-item-duplicate m-slider-bg" style="background-image: url('<?=$_W['attachurl'].$facearr[$facecount-1]['img']?>')"><a href="<?=$facearr[$facecount-1]['link']?>"></a></div>
+                <?php foreach($facearr as $k=>$face):?>
+                <div class="mui-slider-item m-slider-bg" style="background-image: url('<?=$_W['attachurl'].$face['img']?>')"><a href="<?=$face['link']?>"></a></div>
+                <?php endforeach;?>
+                <div class="mui-slider-item mui-slider-item-duplicate m-slider-bg" style="background-image: url('<?=$_W['attachurl'].$facearr[0]['img']?>')"><a href="<?=$facearr[0]['link']?>"></a></div>
+                <?php endif; ?>
+            </div>
+            <div class="mui-slider-indicator">
+                <?php for($fi=0;$fi<$facecount;$fi++): ?>
+                <div class="mui-indicator <?=$fi==0?'mui-active':''?>"></div>
+                <?php endfor;?>
+            </div>
+        </div>
+        <script>var gallery = mui('.home-slider');
+        gallery.slider({
+            interval:5000//自动轮播周期，若为0则不自动播放，默认为0；
+        });</script>
+        <div class="yh_box">
+            <dd class="yh_l_box nt_bg"></dd>
+            <dd class="yh_r_box">
+                <div class="mui-slider home-notice">
+                    <div class="mui-slider-group mui-slider-loop">
+                        <?php if(@is_array($notice)):
+                        $noticecount=count($notice);?>
+                        <div class="mui-slider-item mui-slider-item-duplicate notice_ct jump_url" data-href="<?=appurl('notice','view','id='.$notice[$noticecount-1]['id'])?>"><?=$notice[$noticecount-1]['title']?></div>
+                        <?php foreach($notice as $n=>$nc):
+                        ?>
+                        <div class="mui-slider-item notice_ct jump_url" data-href="<?=appurl('notice','view','id='.$nc['id'])?>"><?=$nc['title']?></div>
+                        <?php endforeach;?>
+                        <div class="mui-slider-item mui-slider-item-duplicate notice_ct jump_url" data-href="<?=appurl('notice','view','id='.$notice[0]['id'])?>"><?=$notice[0]['title']?></div>
+                        <?php endif;?>
+                    </div>
+                </div>
+            </dd>
+        </div>
+        <script>var gallerys = mui('.home-notice');
+        gallerys.slider({
+            interval:5600//自动轮播周期，若为0则不自动播放，默认为0；
+        });
+        </script>
+        <div class="yh_nav_top">
+            <ul class="mui-table-view mui-grid-view mui-grid-9 h_m_ct">
+                <?php $ctnum=0; if(!empty($navarr)):foreach($navarr as $ct):?>
+                <li class="mui-table-view-cell mui-media mui-col-xs-3 mui-col-sm-3"><a href="<?=$ct['link']?>">
+                    <img class="icon-img" src="<?=$ct['icon']==''?MODULE_URL.'/app/views/img/dfticon.png':tomedia($ct['icon'])?>">
+                    <div class="mui-media-body"><?=$ct['title']?></div></a>
+                </li>
+                <?php $ctnum++;endforeach;endif;?>
+                <?php if($ctnum%4>0):for($i=0;$i<(4-$ctnum%4);$i++):?>
+                <li class="mui-table-view-cell mui-media mui-col-xs-3 mui-col-sm-3">
+                </li>
+                <?php endfor;endif?>
+            </ul>
+        </div>
+        <div class="crowd_list">
+
+        </div>
+        <div class="contact" style="text-align: center;padding: 3rem;">
+            <p class="f_t_txt">如有疑问，欢迎联系我们</p>
+            <?php if(@$sys['phone']):?>
+            <p><a href="tel:<?=$sys['phone']?>" class="mui-btn mui-icon mui-icon-phone-filled cr_btn" style="width:80%">&nbsp;&nbsp;<?=$sys['phone']?></a></p>
+            <?php endif; ?>
+            <?php if(@$sys['qq']):?>
+            <p><a href="http://wpa.qq.com/msgrd?v=3&uin=<?=$sys['qq']?>" class="mui-btn mui-icon mui-icon-qq cr_btn" style="width:80%">&nbsp;&nbsp;<?=$sys['qq']?></a></p>
+            <?php endif; ?>
+            <p class="f_t_txt">&copy;<?=@$sys['sysname']?$sys['sysname']:'一点众筹'?>版权所有</p>
+        </div>
+    </div>
+</div>
+<div id="notice-box" class="mui-content sub-page" style="display: none;z-index: 99;padding-top: 4rem;">
+    <div class="mui-bar mui-bar-nav">
+        <h1 class="mui-title">公告</h1>
+        <a class="mui-icon mui-icon-left-nav mui-pull-left close-sub-page" data-p="notice-box"></a>
+    </div>
+    <div class="notice_ct" style="background: #fff;padding: 1rem">
+        <h4 class="n_title"></h4>
+        <p class="f_t_txt n_time"></p>
+        <p class="n_content"></p>
+    </div>
+</div>
+<?php
+include('common/bottom.html');
+?>
+<script>
+
+    var page=1;
+    var limit=10;
+    var lock=0;
+    $(function(){
+        loadcrowd();
+        $('.mui-content').scroll(function(){
+            if ($('.m_document').height() -$(this).scrollTop() - $(this).height()<200){
+                loadcrowd();
+            }
+        });
+        $(function(){
+            $('.start-crowd').on('click',function(){
+                mui.alert('暂不支持自助发起，请联系客服协助发起众筹');
+            })
+        })
+    })
+    function loadcrowd(){
+        if(lock==1){
+            return;
+        }else{
+            lock=1;
+        }
+        $('.crowd_list').append('<div class="mui-loading"><div class="mui-spinner"></div></div>');
+        $.getJSON("<?=appurl('crowd','getcrowd')?>",{page:page,limit:limit},function(d){
+            if(d.id==1){
+                putcrowdlist(d.data);
+                lock=0;
+            }else{
+                lock=1;
+                $('.crowd_list').append('<div class="flow-more"><a href="javascript:;">没有更多啦！</a></div>');
+            }
+            $('.crowd_list').find('.mui-loading').remove();
+        })
+    }
+    function putcrowdlist(d){
+        var html='';
+        for(var o in d){
+            var taghtml='';
+            if(d[o].rcount>0){
+                taghtml+='[回报]';
+            }
+            if(d[o].ntype==1){
+                taghtml+='[联合]';
+            }
+            var nfromt='官方';
+            if(d[o].nfrom==2){
+                nfromt='企业/机构';
+            }else if(d[o].nfrom==1){
+                nfromt='个人';
+            }
+            taghtml+='['+d[o].cname+']';
+            var faceimgarr=eval("("+d[o].coverimg+")");
+            html+='<div class="mui-card crowd_li jump_url_s" data-href="<?=appurl('crowd','detail')?>&id='+d[o].id+'">'+
+                '<div>'+
+            '<div class="cr_tit">'+
+            '<h4 class="l_t"><span class="l_t_cat">'+taghtml+'</span>'+d[o].title+'</h4>'+
+            '</div>'+
+            '</div>'+
+            '<div class="cr-face">'+
+            '<img src="'+(!faceimgarr?'':window.sysinfo.attachurl+faceimgarr[0])+'" alt="" width="100%">'+
+            '</div>'+
+            '<div class="mui-card-footer">'+
+            '<div class="c_fd mui-row">'+
+            '<div class="mui-col-sm-6 mui-col-xs-6">'+nfromt+'<span class="f_t_txt">发起</span></div>'+
+            '   <div class="mui-col-sm-6 mui-col-xs-6">'+
+            '   <span class="f_t_txt right">'+d[o].cstarttime+'</span>'+
+            '</div>'+
+            '</div>'+
+            '<div class="c_att mui-row">'+
+            '    <div class="mui-col-sm-4 mui-col-xs-4">'+
+            '   <dl>'+
+            '   <dh class="u_d_tit f_t_txt">目标金额</dh>'+
+            '   <dd class="u_d_ct">￥'+d[o].money+'</dd>'+
+            '</dl>'+
+            '</div>'+
+            '<div class="mui-col-sm-4 mui-col-xs-4">'+
+            '   <dl>';
+            if(d[o].ntype==0){
+            html+='<dh class="u_d_tit f_t_txt">已筹金额</dh>'+
+                '<dd class="u_d_ct">￥'+d[o].cjmoney+'</dd>';
+            }else{
+                html+='<dh class="u_d_tit f_t_txt">报名人数</dh>'+
+                    '<dd class="u_d_ct">'+d[o].bmnum+'</dd>';
+            }
+            html+='   </dl>'+
+            '</div>'+
+            '<div class="mui-col-sm-4 mui-col-xs-4">'+
+            '    <dl>'+
+            '    <dh class="u_d_tit f_t_txt">参与人数</dh>'+
+            '    <dd class="u_d_ct">'+d[o].ppnum+'</dd>'+
+            '</dl>'+
+            '</div>'+
+            '</div>'+
+            '</div>'+
+            '</div>';
+        }
+        $('.crowd_list').append(html);
+        $('.jump_url_s').on('click',function(){
+            location.href=$(this).data('href');
+        })
+        page++;
+    }
+</script>
+<?php
+include('common/footer.html');
+?>

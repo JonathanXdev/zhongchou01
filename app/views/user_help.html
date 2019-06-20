@@ -1,0 +1,68 @@
+<?php
+include('common/header.html');
+?>
+<style>
+    .category-li{
+        width: 100%!important;
+    }
+</style>
+<div class="mui-bar mui-bar-nav">
+    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+    <h1 class="mui-title">帮助</h1>
+</div>
+<div class="mui-content user-collect">
+    <div class="m_document mui-row">
+        <div class="mui-col-xs-3 mui-col-sm-3">
+            <div id="segmentedControls" class="mui-segmented-control mui-segmented-control-inverted mui-segmented-control-vertical">
+                <?php foreach($category as $c):?>
+                <a class="mui-control-item category-li" data-cid="<?=$c['id']?>" href="javascript:;"><?=$c['name']?></a>
+                <?php endforeach;?>
+            </div>
+        </div>
+        <div id="segmentedControlContents" class="mui-col-xs-9 mui-col-sm-9">
+        </div>
+    </div>
+</div>
+<script>
+    var controls = $("#segmentedControls");
+    var contents = $("#segmentedControlContents");
+$(function(){
+    controls.find('.category-li:first').addClass('mui-active');
+    loadhelp(controls.find('.category-li:first').data('cid'));
+    $('.category-li').on('tap',function(){
+        loadhelp($(this).data('cid'));
+    })
+})
+function loadhelp(cid){
+    contents.find('.mui-loading').remove();
+    contents.append('<div class="mui-loading"><div class="mui-spinner"></div></div>');
+    $.getJSON("<?=appurl('user','helplistjson')?>",{cid:cid},function(d){
+        if(d.id==1){
+            puthelplist(d.data,cid);
+        }else{
+            contents.find('.flow-more').remove();
+            contents.append('<div class="flow-more"><a href="javascript:;">没有找到</a></div>');
+        }
+        contents.find('.mui-loading').remove()
+    })
+}
+function puthelplist(d,cid){
+    var html='';
+    html+='<div id="help-c-'+cid+'" class="mui-control-content">';
+    html+='<ul class="mui-table-view" style="margin: 0">';
+        for(var o in d){
+            html+='<li class="mui-table-view-cell mui-collapse">'+
+                '<a class="mui-navigate-right" href="#">'+d[o].title+'</a>'+
+                '<div class="mui-collapse-content">'+
+                '<h4>'+d[o].title+'</h4>'+d[o].content+'</div>'+
+            '</li>';
+        }
+    html+='</ul>';
+    html+='</div>';
+    contents.html(html);
+    contents.find('#help-c-'+cid).addClass('mui-active');
+}
+</script>
+<?php
+include('common/footer.html');
+?>

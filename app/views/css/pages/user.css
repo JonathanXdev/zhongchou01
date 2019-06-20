@@ -1,0 +1,35 @@
+.top-face{
+    height: 20rem;
+    background-color: #04071c;
+    background-image: radial-gradient(#fffc55, rgba(255,255,255,.2) 2px, transparent 40px), radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px), radial-gradient(#a1ccff, rgba(255,255,255,.1) 2px, transparent 40px), radial-gradient(rgba(255,255,255,.4), rgba(255,255,255,.1) 2px, transparent 30px);
+    background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px;
+    background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
+    position: relative;
+}
+.top-face .f-avatar{
+    position: absolute;
+    top: 5rem;
+    width: 8rem;
+    height: 8rem;
+    background: #fff;
+    left: 5rem;
+    border-radius: 4rem;
+    overflow: hidden;
+}
+.top-face .f-att{
+    position: absolute;
+    left: 14rem;
+    right: 1rem;
+    top: 6.5rem;
+    color: #fff;
+}
+.top-face .f-nick{
+    font-weight: bold;
+    display: block;
+}
+.top-c-m{
+    background: #fff!important;
+}
+.yh_nav_top ul,.yh_nav_top ul li{
+    border:none!important;
+}

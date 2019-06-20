@@ -1,0 +1,352 @@
+<?php
+include('common/header.html');
+?>
+<link href="<?=MODULE_URL.'app/views/css/progressbar.mui.min.css'?>" rel="stylesheet">
+<style>
+    pre { border:solid 1px #fff;}
+    .jiantou {
+        width: 12px;
+        display: inline-block;
+        font-size: 0;
+        border-top: 2px solid rgba(0, 0, 0, .2);
+        border-left: 2px solid rgba(0, 0, 0, .2);
+        width: 8px;
+        height: 8px;
+        background-color: transparent;
+        -webkit-transform: rotate(135deg);
+        transform: rotate(135deg);
+        width: 10px;
+        height: 10px;
+        -webkit-transform: rotate(-45deg);
+        transform: rotate(-45deg);
+        border-color: #333;
+        margin-right: 13px;
+    }
+    .fundtoo {
+        display: inline-block;
+        background: #43ac43;
+        color: #fff;
+        padding: 6px 8px;
+        border-radius: 3px;
+        font-size: 14px
+    }
+    .m-auth-li{
+        padding: 25% 0 0;
+        display: block;
+        height: 0;
+        font-size: 0;
+        line-height: 0;
+        position: relative;
+    }
+    .auth-box{
+        background: #fff;
+    }
+    .auth-img{
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        bottom:2px;
+        left: 2px;
+        background-size: cover;
+        background-position: center;
+    }
+</style>
+<span class="mui-icon iconfont icon-31shouye nav-home jump_url" data-href="<?=appurl('home','index')?>"></span>
+<div class="mui-content page-crowd-detail" style="">
+    <div class="m_document" style="margin-bottom: 4rem;">
+        <div class="mui-slider" style="max-height: 20rem;">
+            <div class="mui-slider-group">
+                <?php if(!empty($crowd['coverimg'])!=''):$coverimg=$crowd['coverimg'];foreach($coverimg as $cimg): ?>
+                <div class="mui-slider-item m-slider-bg" style="background-image: url('<?=$_W['attachurl'].$cimg?>');height: 20rem;"></div>
+                <?php endforeach;endif;?>
+            </div>
+            <?php
+            $time=time();
+            if($crowd['starttime']<=$time && $crowd['endtime']>=$time){
+                $stcls='ing';
+                $sttit='进行中';
+                $djstime=$crowd['endtime'];
+                $djstit='后结束';
+            }else if($crowd['starttime']>$time){
+                $stcls='nostart';
+                $sttit='未开始';
+                $djstime=$crowd['starttime'];
+                $djstit='后开始';
+            }else if($crowd['endtime']<$time){
+                $stcls='end';
+                $sttit='已结束';
+                $djstime=0;
+                $djstit='已结束';
+            }
+            if($crowd['cjtype']==0 && $crowd['ntype']=='0' && $crowd['cjmoney']>=$crowd['money']){
+                $stcls='end';
+                $sttit='已结束';
+                $djstime=0;
+                $djstit='已结束';
+            }
+            ?>
+            <span class="crowd_status <?=$stcls?>"><?=$sttit?></span>
+        </div>
+        <div class="crowd_single">
+            <div class="single-r1 f_t_txt">
+                <span><span class="single-r1-span c_timer" data-dt="<?=$djstime?>"></span><?=$djstit?></span>
+            </div>
+            <div class="single-t">
+                <h3><?=$crowd['title']?></h3>
+            </div>
+            <div class="single-txt clearfix">
+                <p class="f_t_txt"><?=$crowd['summary']?></p>
+            </div>
+            <div class="c_att mui-row">
+                <div class="mui-col-sm-4 mui-col-xs-4">
+                    <dl>
+                        <dd class="u_d_ct">￥<?=number_format($crowd['money'],2)?></dd>
+                        <dh class="u_d_tit">目标金额</dh>
+                    </dl>
+                </div>
+                <div class="mui-col-sm-4 mui-col-xs-4">
+                    <dl>
+                        <dd class="u_d_ct">￥<?=number_format($crowd['cjmoney'],2)?></dd>
+                        <dh class="u_d_tit">已筹金额</dh>
+                    </dl>
+                </div>
+                <div class="mui-col-sm-4 mui-col-xs-4">
+                    <dl>
+                        <dd class="u_d_ct"><?=number_format($crowd['ppnum'])?></dd>
+                        <dh class="u_d_tit">支持次数</dh>
+                    </dl>
+                </div>
+                <!-- 进度条 -->
+                <?php
+                $progrenum=@ceil($crowd['cjmoney']/$crowd['money']*100);
+                if($progrenum>50){
+                    if(100-$progrenum<0){
+                        $prostyle='right:0%';
+                    }else{
+                        $prostyle='right:'.(100-$progrenum).'%';
+                    }
+                }else{
+                    $prostyle='left:'.$progrenum.'%';
+                }
+            ?>
+                <div class="m-pro-box mui-col-sm-12 mui-col-xs-12" style="margin-top: 10px;">
+                    <b class="pb_txt" style="<?=$prostyle?>"><?=$progrenum?>%</b>
+                    <div id="crowd-ppbar" class="mui-progressbar mui-progressbar-success" data-progress="<?=$progrenum?>" ><span class="pb_bar"></span></div>
+                </div>
+                <!-- 进度条 end -->
+            </div>
+        </div>
+        <div class="auth-box"  style="display: none">
+            <p style="padding-left: 10px;font-size:16px;">资质证明</p>
+            <div class="mui-row" style="padding-left: 10px;padding-bottom: 10px;">
+                <script>
+                    var imgarr=[];
+                </script>
+                <?php foreach($authlist as $auth):if($auth['status']==1):?>
+                <div class="mui-col-sm-3 mui-col-xs-3 m-auth-li" width="81.25px;" >
+                    <span class="auth-img prev-img" data-img="<?=tomedia($auth['img'])?>" style="background-image: url('<?=tomedia($auth['img'])?>'); width:81.25px;"></span>
+                    <div style="font-size:11px;color:#fff;background:rgba(67,172,67,1);position: absolute;top: 0;left: 0;min-width: 56px;padding: 10px 6px;text-align: center;border-radius: 0 0 10px 0;">审核通过</div>
+                    <script>
+                        imgarr.push('<?=tomedia($auth['img'])?>');
+                    </script>
+                </div>
+                <?php endif;endforeach;?>
+                <script>
+                    $(function () {
+                        $('.prev-img').unbind('tap').on('tap',function () {
+                            var that=this;
+                            wx.previewImage({
+                                current: $(that).data('img'),
+                                urls:imgarr
+                            });
+                        });
+                    })
+                </script>
+            </div>
+        </div>
+        <div class="crowd_detail">
+            <div id="crowd-item-slider">
+                <div class="scroll-bar-box" style="height: 40px;">
+                    <div class="mui-segmented-control mui-segmented-control-inverted scroll-bar">
+                        <a class="mui-control-item mui-active t_get_j" data-l="0" href="#crowd-detail-box">详情</a>
+                        <a class="mui-control-item t_get_j" data-l="1" data-d="crowd-report-box" data-a="<?=appurl('crowd','getreports','crowd_id='.$crowd['id'])?>" href="#crowd-report-box">支持</a>
+                        <a class="mui-control-item" href="#crowd-comment-box">留言</a>
+                        <a class="mui-control-item t_get_j" data-l="0" data-d="crowd-march-box" href="#crowd-march-box" data-a="<?=appurl('crowd','getmarchs','crowd_id='.$crowd['id'])?>" >进展</a>
+
+                    </div>
+                </div>
+                <div class="crowd-ct-box">
+                    <div id="crowd-comment-box" class="mui-control-content">
+                        <?php
+                        $vfrom='crowd';
+                        $from_id=$crowd['id'];
+                        include('common/comment_box.html');
+                        ?>
+                    </div>
+                    <div id="crowd-detail-box" class="mui-control-content mui-active">
+                        <div class="c_d_ct cr_detail">
+                            <div class="mui-loading">
+                                <div class="mui-spinner">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="crowd-march-box" class="mui-control-content">
+                        <div class="c_d_ct">
+                            <ul class="mui-table-view mui-table-view-striped mui-table-view-condensed">
+                            </ul>
+                        </div>
+
+                    </div>
+                    <div id="crowd-report-box" class="mui-control-content">
+                        <div class="c_d_ct">
+                            <ul class="mui-table-view">
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mui-row btm_menu">
+    <div class="mui-col-sm-2 mui-col-xs-2 collect-btn" data-bsid="<?=$crowd['id']?>" data-nfrom="1" data-title="<?=$crowd['title']?>" data-link="<?=appurl('crowd','detail','id='.$crowd['id'])?>" data-url="<?=appurl('collect','index')?>">
+        <?php if(!iscollect($crowd['id'],1)):?>
+        <span class="mui-icon-extra mui-icon-extra-heart"></span>
+        <?php else:?>
+        <span class="mui-icon-extra mui-icon-extra-heart-filled"></span>
+        <?php endif;?>
+    </div>
+    <?php if($stcls=='end'):?>
+    <div class="mui-col-sm-10 mui-col-xs-10 disabled">项目已结束</div>
+    <?php elseif($stcls=='nostart'): ?>
+    <div class="mui-col-sm-10 mui-col-xs-10 share-btn"><span class="mui-icon-extra mui-icon-extra-share"></span> 助力分享</div>
+    <?php else: ?>
+    <div class="mui-col-sm-4 mui-col-xs-4 share-btn"><span class="mui-icon-extra mui-icon-extra-share"></span> 分享</div>
+    <div class="mui-col-sm-6 mui-col-xs-6 jump_url" data-href="<?=appurl('crowd','reward','crowd_id='.$crowd['id'])?>">我要支持</div>
+    <?php endif; ?>
+</div>
+<script>
+    var posturl='';
+    var page=1;
+    var lock=0;
+    var repgear=0;
+    var limit=10;
+    var marchlock=0;
+    $(function(){
+        leftTimer('.c_timer');
+        mui('#crowd-ppbar').progressbar({progress:$('#crowd-ppbar').data("progress")}).show();
+        var crowddetail=<?=json_encode(array('content'=>$crowd['content']))?>;
+        setTimeout(function() {
+            $('#crowd-detail-box .c_d_ct').html(crowddetail.content);
+        }, 500);
+        $('.t_get_j').on('tap',function(){
+            if($(this).data('l')==1){
+                repgear=1;
+                posturl=$(this).data('a');
+                mscrollload();
+            }else if($(this).data('l')=='0'){
+                getmarch($(this).data('a'),$(this).data('d'));
+            }
+        });
+        $('.mui-content').scroll(function() {
+            $(".scroll-bar-box").each(function(){
+                var ttop = $(this).offset().top;
+                var tbox = $('.m_document').scrollTop();
+                var top = ttop-tbox;
+                if (top <= 0) {
+                    $(this).find('.scroll-bar').addClass('fixed_top');
+                }else{
+                    $(this).find('.scroll-bar').removeClass('fixed_top');
+                }
+            });
+
+        });
+    });
+    function get_json_data(func){
+        if(lock==0){
+            lock=1;
+        }else{
+            return;
+        }
+        $('#crowd-report-box').find('.c_d_ct').append('<div class="mui-loading"><div class="mui-spinner"></div></div>');
+        $.getJSON(posturl,{page:page,limit:limit},function(d){
+            if(d.id==1){
+                console.log(d)
+                    $('#crowd-report-box').find('.c_d_ct ul').append(tdomframe(d.data));
+                    var parr=d.page;
+                    if(parr[0]<=page){
+                        $('#crowd-report-box').find('.c_d_ct').append('<div class="flow-more"><a href="javascript:;">没有更多了</a></div>');
+                        lock=1;
+                    }else{
+                        lock=0;
+                        page++;
+                    }
+            }else{
+                $('#crowd-report-box').find('.c_d_ct').append('<div class="flow-more"><a href="javascript:;">没有更多了</a></div>');
+            }
+            $('#crowd-report-box').find('.c_d_ct .mui-loading').remove();
+        })
+    }
+    function tdomframe(d){
+        var html='';
+        for(var o in d) {
+            html+='<li class="mui-table-view-cell mui-media">'+
+                    '<a href="javascript:;">'+
+                    '<img class="c_d_avatar mui-media-object mui-pull-left" src="'+(!d[o].avatar?'<?=MODULE_URL.'app/views/img/timg.jpg'?>':d[o].avatar)+'">'+
+                    '<div class="mui-media-body">'+
+                    '<b>'+d[o].nickname+'</b> 支持了 <span class="c_d_money">'+d[o].money+'</span>元'+(d[o].status==-2?'[已退款]':'')+
+                    '<p class="mui-ellipsis">'+d[o].message+'</p>'+
+                    '<p class="mui-h6 mui-ellipsis">'+d[o].uaddtime+'</p>'+
+                    '</div>'+
+                    '</a>'+
+                    '</li>';
+
+        }
+        return html;
+    }
+    function mscrollload(){
+        get_json_data();
+        $('.mui-content').scroll(function(){
+            if ($('.m_document').height() -$(this).scrollTop() - $(this).height()<200){
+                if(lock==1){
+                    return;
+                }
+                get_json_data();
+            }
+        });
+    }
+    function getmarch(purl,pdom){
+        if(marchlock==1){
+           return;
+        }else{
+            marchlock=1;
+        }
+        $('#'+pdom).find('.c_d_ct').append('<div class="mui-loading"><div class="mui-spinner"></div></div>');
+        $.getJSON(purl,function(d){
+            if(d.id==-1){
+                $('#'+pdom).find('.c_d_ct').append('<div class="flow-more"><a href="javascript:;">暂时还没有进展发布！</a></div>');
+            }else if(d.id==1){
+                var phtml='';
+                var pdata=d.data;
+                for(var o in pdata){
+                    phtml+='<li class="mui-table-view-cell">'+
+                        '<div class="mui-table">'+
+                        '<h4>'+pdata[o].title+'</h4>'+
+                        '<h5>'+pdata[o].uaddtime+' <span class="mui-badge mui-badge-success">'+pdata[o].nfrom+'</span></h5>'+
+                        '<p class="mui-h6">'+pdata[o].content+'</p>'+
+                        '</div>'+
+                        '</li>';
+                }
+                $('#'+pdom).find('.c_d_ct ul').append(phtml);
+                $('#'+pdom).find('.c_d_ct').append('<div class="flow-more"><a href="javascript:;">没有更多啦！</a></div>');
+            }
+            $('#'+pdom).find('.c_d_ct .mui-loading').remove();
+        })
+
+    }
+</script>
+<?php
+include('common/footer.html');
+?>

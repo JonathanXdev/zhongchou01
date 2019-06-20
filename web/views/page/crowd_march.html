@@ -1,0 +1,76 @@
+<div class="page-title">
+    <div class="page-breadcrumb">
+        <ol class="breadcrumb">
+            <li><a href="<?=weburl('home','index')?>">首页</a></li>
+            <li class="active">众筹进展管理[<?=$crowd['title']?>]</li>
+        </ol>
+    </div>
+</div>
+<div id="main-wrapper">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-white">
+                <div class="panel-body">
+                    <div style="float: right; margin-bottom: 10px">
+                        <button id="add-march" class="btn btn-default" data-toggle="modal" data-target=".bs-example-modal-sm">增加进展</button>
+                    </div>
+                    <table id="crowd-march" class="table table-bordered table-striped" style="clear: both">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>标题</th>
+                            <th>内容</th>
+                            <th>进展来源</th>
+                            <th>时间</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php if(is_array($march)):foreach($march as $c):?>
+                        <tr>
+                            <td>1</td>
+                            <td><a href="#" data-type="text" data-pk="<?=$c['id']?>" data-title="输入进展标题" class="march-title editable editable-click" style="display: inline;"><?=$c['title']?></a></td>
+                            <td><a href="#" data-type="textarea" data-pk="<?=$c['id']?>" data-title="输入公告内容" class="editable editable-click march-content" style="display: inline;"><?=$c['content']?></a></td>
+                            <td><a href="#" data-type="text" data-pk="<?=$c['id']?>" data-title="输入进展来源" class="march-nfrom editable editable-click" style="display: inline;"><?=$c['nfrom']?></a></td>
+                            <td><?=date('Y-m-d',$c['addtime'])?></td>
+                            <td><button data-pk="<?=$c['id']?>" class="btn btn-danger btn-rounded march-del">删除</button></td>
+                        </tr>
+                        <?php endforeach;endif;?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- Main Wrapper -->
+<div class="modal fade bs-example-modal-sm in" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="mySmallModalLabel">增加进展</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" name="march-form" id="march-form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="title" id="title" placeholder="进展标题">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="nfrom" id="nfrom" placeholder="进展来源，仅作展示用">
+                    </div>
+                    <div class="form-group">
+                        <textarea name="content" class="form-control"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success" id="march-sub">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var editurl='<?=weburl('crowd','editmarch','crowd_id='.$crowd['id'])?>';
+    var delurl='<?=weburl('crowd','delmarch','crowd_id='.$crowd['id'])?>';
+</script>

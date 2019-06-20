@@ -1,0 +1,332 @@
+<div class="page-title">
+    <div class="page-breadcrumb">
+        <ol class="breadcrumb">
+            <li><a href="<?=weburl('home','index')?>">首页</a></li>
+            <li class="active">系统设置</li>
+        </ol>
+    </div>
+</div>
+<div id="main-wrapper">
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="<?=$mf=='df'?'active':''?>"><a href="<?=weburl('system','set','mf=df')?>">基础设置</a></li>
+        <li class="<?=$mf=='wxmsg'?'active':''?>"><a href="<?=weburl('system','set','mf=wxmsg')?>">微信通知</a></li>
+        <li class="<?=$mf=='sms'?'active':''?>"><a href="<?=weburl('system','set','mf=sms')?>">短信</a></li>
+        <li style="display: none;" class="<?=$mf=='wxpay'?'active':''?>"><a href="<?=weburl('system','set','mf=wxpay')?>">微信付款设置</a></li>
+        <li class="<?=$mf=='cmt'?'active':''?>"><a href="<?=weburl('system','set','mf=cmt')?>">留言设置</a></li>
+    </ul>
+    <div class="row">
+        <?php if($mf=='df' || $mf==''):?>
+        <div class="col-md-8">
+            <div class="panel panel-white">
+                <div class="panel-heading clearfix">
+                    <h4 class="panel-title">站点信息</h4>
+                </div>
+                <div class="panel-body">
+                <form class="form-horizontal" id="system-set" action="<?=weburl('system','subsystem')?>" method="post">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">系统名称</label>
+                        <div class="col-sm-10">
+                            <input type="text" aria-required="sysname" value="<?=@$system['sysname']?>" class="form-control" name="sysname">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">系统logo</label>
+                        <div class="col-sm-10">
+                            <?=@tpl_form_field_image('syslogo', @$system['syslogo'], '', array('global' => false, 'extras' => array('image'=> ' width="32" ')));?>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">官网地址</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="website" value="<?=@$system['website']?>" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">公司电话</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" value="<?=@$system['phone']?>" name="phone">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">客服QQ</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="qq" value="<?=@$system['qq']?>" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">客服微信</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="weixin" value="<?=@$system['weixin']?>" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">微信接口退款</label>
+                        <div class="col-sm-10">
+                            <select multiple="" name="refund">
+                                <option value="0" <?=@$system['refund']=='0' || @$system['refund']==''?'selected':''?>>关</option>
+                                <option value="1" <?=@$system['refund']=='1'?'selected':''?>>开</option>
+                            </select>
+                            <p class="help-block">打开微信接口退款需要在微擎中配置退款接口！</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">余额支付</label>
+                        <div class="col-sm-10">
+                            <select multiple="" name="cashpay">
+                                <option value="0" <?=@$system['cashpay']=='0' || @$system['cashpay']==''?'selected':''?>>关</option>
+                                <option value="1" <?=@$system['cashpay']=='1'?'selected':''?>>开</option>
+                            </select>
+                            <p class="help-block">打开后，将支持微擎余额支付</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">第三方统计代码</label>
+                        <div class="col-sm-10">
+                            <textarea name="statcode" class="form-control"><?=@$system['statcode']?></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">风险提示</label>
+                        <div class="col-sm-10">
+                            <?=tpl_ueditor('risk',@$system['risk'],array(
+                                'dest_dir'=>'',
+                            'global'=>false,
+                            'class_extra'=>'',
+                            'direct'=>true,
+                            'multiple'=>false,
+                            'filesizelimit'=>5120000,
+                            'maximumWords'=>10000
+                            ));?>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">关于我们</label>
+                        <div class="col-sm-10">
+                            <?=tpl_ueditor('about',@$system['about'],array(
+                                'dest_dir'=>'',
+                            'global'=>false,
+                            'class_extra'=>'',
+                            'direct'=>true,
+                            'multiple'=>false,
+                            'filesizelimit'=>5120000,
+                            'maximumWords'=>10000
+                            ));?>
+                        </div>
+                    </div>
+                    <button type="button" data-ntype="" class="btn btn-success btn-lg" id="sub-system-btn" style="float:right">提交</button>
+                </form>
+                </div>
+            </div>
+        </div>
+        <?php endif;?>
+        <?php if($mf=='wxmsg'):?>
+        <div class="col-md-6">
+            <div class="panel panel-white">
+            <div class="panel-heading clearfix">
+                <h4 class="panel-title">微信通知设置</h4>
+            </div>
+            <div class="panel-body">
+                <?php
+                        $wxmsgarr=@unserialize($system['wxmsg']);
+                    ?>
+                <form class="form-horizontal" id="system-wxmsg" action="<?=weburl('system','wxmsg')?>" method="post">
+                    <div class="form-group">
+                        <label for="wxmsg-crowd-verify" class="col-sm-3 control-label">项目审核通过</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" name="crowd[verifysuccess]" id="wxmsg-crowd-verify" placeholder="消息模板ID" value="<?=@$wxmsgarr['verifysuccess']?>">
+                            <p class="help-block">审核通过提醒,模板编号为：OPENTM411672609</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="wxmsg-crowd-failed" class="col-sm-3 control-label">项目审核失败</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" name="crowd[verifyfailed]" id="wxmsg-crowd-failed" placeholder="消息模板ID" value="<?=@$wxmsgarr['verifyfailed']?>">
+                            <p class="help-block">审核不通过提醒,模板编号为：OPENTM411720509</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="wxmsg-report" class="col-sm-3 control-label">联合众筹被支持</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" name="crowd[report]" id="wxmsg-report" placeholder="消息模板ID" value="<?=@$wxmsgarr['report']?>">
+                            <p class="help-block">众筹收到支持通知,模板编号为：OPENTM400044406</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="wxmsg-success" class="col-sm-3 control-label">众筹成功</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" name="crowd[success]" id="wxmsg-success" placeholder="消息模板ID" value="<?=@$wxmsgarr['success']?>">
+                            <p class="help-block">众筹成功通知，模板编号为：OPENTM413299411（普通众筹通知需开启自动任务。）</p>
+                        </div>
+                    </div>
+                    <div class="form-group" style="">
+                        <label for="wxmsg-failed" class="col-sm-3 control-label">众筹失败</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" name="crowd[failed]" id="wxmsg-failed" placeholder="消息模板ID" value="<?=@$wxmsgarr['failed']?>">
+                            <p class="help-block">众筹失败通知,模板编号为：OPENTM411479111（需开启自动任务，否则无法发送）</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="wxmsg-reward" class="col-sm-3 control-label">回报进展</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" name="crowd[reward]" id="wxmsg-reward" placeholder="消息模板ID" value="<?=@$wxmsgarr['reward']?>">
+                            <p class="help-block">筹款回报进展通知,模板编号为：OPENTM405457671</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="wxmsg-refund" class="col-sm-3 control-label">退款通知</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" name="crowd[refund]" id="wxmsg-refund" placeholder="消息模板ID" value="<?=@$wxmsgarr['refund']?>">
+                            <p class="help-block">退款通知,模板编号为：TM00004</p>
+                        </div>
+                    </div>
+                    <button type="button" data-ntype="" class="btn btn-success btn-lg" style="float:right" id="wxmsg-btn">提交</button>
+                </form>
+            </div>
+        </div>
+        </div>
+        <?php endif;?>
+        <?php if($mf=='sms'):?>
+        <div class="col-md-6">
+            <div class="panel panel-white">
+                <div class="panel-heading clearfix">
+                    <h4 class="panel-title">短信设置</h4>
+                </div>
+                <div class="panel-body">
+                    <?php
+                        $smsarr=@unserialize($system['smscode']);
+                    ?>
+                    <form class="form-horizontal" id="system-smsarr" action="<?=weburl('system','smscode')?>" method="post">
+                        <div class="form-group">
+                            <label for="wxmsg-crowd-verify" class="col-sm-3 control-label">变量设置</label>
+                            <div class="col-sm-9">
+                                <div class="input-group m-b-sm col-sm-12">
+                                    <span class="input-group-addon">验证码变量</span>
+                                    <input name="smsarr[templateparam][code]" type="text" class="form-control" placeholder="验证码变量，如code" value="<?=@$smsarr['templateparam']['code']?>">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="wxmsg-crowd-failed" class="col-sm-3 control-label">短信模版ID</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="smsarr[templatecode]" placeholder="SMS_0000001" value="<?=@$smsarr['templatecode']?>">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="wxmsg-success" class="col-sm-3 control-label">短信签名</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="smsarr[signname]" placeholder="短信签名" value="<?=@$smsarr['signname']?>">
+                            </div>
+                        </div>
+                        <button type="button" data-ntype="" class="btn btn-success btn-lg" style="float:right" id="smsarr-btn">提交</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-white">
+                <div class="panel-heading clearfix">
+                    <h4 class="panel-title">阿里通讯设置</h4>
+                </div>
+                <div class="panel-body">
+                    <?php
+                        $alismscfg=@unserialize($system['alismscfg']);
+                    ?>
+                    <form class="form-horizontal" id="system-smscfg" action="<?=weburl('system','smscfg','ff=ali')?>" method="post">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Access Key ID</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="alismscfg[accesskeyid]" placeholder="阿里云通讯Access Key ID" value="<?=@$alismscfg['accesskeyid']?>">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="wxmsg-success" class="col-sm-3 control-label">Access Key Secret</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="alismscfg[accesskeysecret]" placeholder="阿里云通讯Access Key Secret" value="<?=@$alismscfg['accesskeysecret']?>">
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-success btn-lg" style="float:right" id="smscfg-btn">提交</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <?php endif;?>
+        <?php if($mf=='wxpay'):?>
+        <div class="col-md-6">
+            <div class="panel panel-white">
+                <div class="panel-heading clearfix">
+                    <h4 class="panel-title">支付设置</h4>
+                </div>
+                <div class="panel-body">
+                    <form class="form-horizontal" id="pay-set" action="<?=weburl('system','wxpay')?>" method="post">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">商户号</label>
+                            <div class="col-sm-7">
+                                <input type="text" name="wxpay[mchid]" value="" placeholder="*******" class="form-control">
+                                <p class="help-block">微信支付商户号</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">微信支付秘钥</label>
+                            <div class="col-sm-7">
+                                <input type="text" name="wxpay[apikey]" placeholder="*******"  value="" class="form-control">
+                                <p class="help-block">https://pay.weixin.qq.com 帐户设置-安全设置-API安全-API密钥-设置API密钥</p>
+                            </div>
+                        </div>
+
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">apiclient_cert文件</label>
+                            <div class="col-sm-7">
+                                <textarea name="wxpay[apiclient_cert]" class="form-control" placeholder="为了安全，不显示内容，如需修改请直接输入"></textarea>
+                                <p class="help-block">apiclient_cert.pem证书文件内容</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">apiclient_key文件</label>
+                            <div class="col-sm-7">
+                                <textarea name="wxpay[apiclient_key]" class="form-control" placeholder="为了安全，不显示内容，如需修改请直接输入"></textarea>
+                                <p class="help-block">apiclient_key.pem证书文件内容</p>
+                            </div>
+                        </div>
+                        <button type="button" data-ntype="" class="btn btn-success btn-lg" id="sub-pay-btn" style="float:right">提交</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <?php endif;?>
+        <?php if($mf=='cmt'):?>
+        <?php
+                        $cmt=@unserialize($system['cmt']);
+                    ?>
+        <div class="col-md-6">
+            <div class="panel panel-white">
+                <div class="panel-heading clearfix">
+                    <h4 class="panel-title">留言回复设置</h4>
+                </div>
+                <div class="panel-body">
+                    <form class="form-horizontal" id="cmt-set" action="<?=weburl('system','cmt')?>" method="post">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">违禁词</label>
+                            <div class="col-sm-7">
+                                <input type="text" value="<?=$cmt['words']?>" data-role="tagsinput" class="form-control" name="cmt[words]">
+                                <p class="help-block">违禁词，英文逗号或回车分割</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">审核</label>
+                            <div class="col-sm-7">
+                                <select multiple name="cmt[verify]" style="height: auto!important;" class="form-control">
+                                    <option value="1" <?=$cmt['verify']=='1'?'selected':''?>>开启审核</option>
+                                    <option value="0" <?=$cmt['verify']=='0'?'selected':''?>>关闭审核</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="button" data-f="#cmt-set" class="btn btn-success btn-lg sub-set-btn" id="sub-cmt-btn" style="float:right">提交</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <?php endif;?>
+    </div>
+</div><!-- Main Wrapper -->

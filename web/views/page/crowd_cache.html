@@ -1,0 +1,75 @@
+<div class="page-title">
+    <div class="page-breadcrumb">
+        <ol class="breadcrumb">
+            <li><a href="<?=weburl('home','index')?>">首页</a></li>
+            <li class="active">众筹审核</li>
+        </ol>
+    </div>
+</div>
+<div id="main-wrapper">
+    <div class="row">
+        <div class="panel panel-dark">
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <div class="dataTables_wrapper project-stats">
+                        <div class="input-group m-b-sm col-md-6 col-md-offset-6">
+                            <input type="text" id="search-key" placeholder="<?=$key?>" class="form-control">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" id="search-btn">查找</button>
+                            </span>
+                        </div>
+                        <table id="crowdtable" class="display table" style="width: 100%;" role="grid">
+                            <thead>
+                            <tr role="row">
+                                <th rowspan="1" colspan="1" style="width: 80px;">ID</th>
+                                <th rowspan="1" colspan="1" style="width: 80px;">用户ID</th>
+                                <th rowspan="1" colspan="1" style="width: 80px;">姓名</th>
+                                <th rowspan="1" colspan="1" style="width: 140px">联系电话</th>
+                                <th rowspan="1" colspan="1" style="width: 140px">众筹标题</th>
+                                <th rowspan="1" colspan="1" style="width: 100px;">提交时间</th>
+                                <th rowspan="1" colspan="1" style="width: 90px;">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php if(is_array($crowd)):foreach($crowd as $m):
+                                $default_info=@json_decode($m['default_info'],true);
+                                $crowd_info=@json_decode($m['crowd_info'],true);
+                            ?>
+                            <tr role="row" id="m_list_<?=$m['id']?>" data-info="<?=urlencode(json_encode($m))?>">
+                                <td rowspan="1" colspan="1"><?=$m['id']?></td>
+                                <td rowspan="1" colspan="1"><?=$m['uid']?></td>
+                                <td rowspan="1" colspan="1"><?=$m['name']?></td>
+                                <td rowspan="1" colspan="1"><?=$m['phone']?><?=$m['phoneak']==1?'<span class="label label-success">已验证</span>':'<span class="label label-danger">未验证</span>'?></td>
+                                <td rowspan="1" colspan="1"><?=$crowd_info['title']?></td>
+                                <td rowspan="1" colspan="1"><?=date('Y-m-d H:i:s',$m['lasttime'])?></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-primary btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">操作<span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a href="<?=weburl('crowd','docheck')?>&id=<?=$m['id']?>">查看/处理</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach;endif?>
+                            </tbody>
+                        </table>
+                        <?=paginations($pagination,'crowd','check',$key==''?'':'key='.$key)?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var page_url='<?=weburl('crowd','check')?>';
+    $(function(){
+        $('#search-btn').on('click',function(){
+            var keys=$('#search-key').val();
+            if(keys!=''){
+                location.href=page_url+'&key='+keys;
+            }
+        })
+    })
+</script>

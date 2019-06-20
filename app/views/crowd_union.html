@@ -1,0 +1,316 @@
+<?php
+include('common/header.html');
+?>
+<span class="mui-icon iconfont icon-31shouye nav-home jump_url" data-href="<?=appurl('home','index')?>"></span>
+<div class="mui-content page-crowd-detail">
+    <div class="m_document" style="margin-bottom: 4rem;">
+        <div class="mui-slider" >
+            <div class="mui-slider-group">
+                <?php if($crowd['coverimg']!=''):$coverimg=$crowd['coverimg'];foreach($coverimg as $cimg): ?>
+                <div class="mui-slider-item m-slider-bg" style="background-image: url('<?=$_W['attachurl'].$cimg?>');height: 20rem;"></div>
+                <?php endforeach;endif;?>
+            </div>
+            <?php
+            $time=time();
+            if($crowd['starttime']<=$time && $crowd['endtime']>=$time){
+                $stcls='ing';
+                $sttit='进行中';
+                $djstime=$crowd['endtime'];
+                $djstit='后结束';
+            }else if($crowd['starttime']>$time){
+                $stcls='nostart';
+                $sttit='未开始';
+                $djstime=$crowd['starttime'];
+                $djstit='后开始';
+            }else if($crowd['endtime']<$time){
+                $stcls='end';
+                $sttit='已结束';
+                $djstime=0;
+                $djstit='已结束';
+            }
+            ?>
+            <span class="crowd_status <?=$stcls?>"><?=$sttit?></span>
+        </div>
+        <div class="crowd_single">
+            <div class="single-r1">
+                <span>众筹时间：<span class="single-r1-span c_timer" data-dt="<?=$djstime?>"></span><?=$djstit?></span>
+            </div>
+            <div class="single-t">
+                <h3><?=$crowd['title']?></h3>
+            </div>
+            <div class="single-txt clearfix">
+                <p><?=$crowd['summary']?></p>
+            </div>
+            <div class="c_att mui-row">
+                <div class="mui-col-sm-4 mui-col-xs-4">
+                    <dl>
+                        <dd class="u_d_ct">￥<?=number_format($crowd['money'])?></dd>
+                        <dh class="u_d_tit">目标筹款(元)</dh>
+                    </dl>
+                </div>
+                <div class="mui-col-sm-4 mui-col-xs-4">
+                    <dl>
+                        <dd class="u_d_ct"><?=number_format($crowd['bmnum'])?></dd>
+                        <dh class="u_d_tit">报名人数(人)</dh>
+                    </dl>
+                </div>
+                <div class="mui-col-sm-4 mui-col-xs-4">
+                    <dl>
+                        <dd class="u_d_ct"><?=number_format($overnum['count'])?></dd>
+                        <dh class="u_d_tit">筹款成功(人)</dh>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="crowd_detail">
+            <div id="crowd-item-slider">
+                <div class="scroll-bar-box" style="height: 40px;">
+                    <div class="mui-segmented-control mui-segmented-control-inverted scroll-bar">
+                        <a class="mui-control-item mui-active t_get_j" data-l="0" href="#crowd-detail-box">详情</a>
+                        <a class="mui-control-item t_get_j" data-l="0" data-d="crowd-march-box" href="#crowd-march-box" data-a="<?=appurl('crowd','getmarchs','crowd_id='.$crowd['id'])?>" >进展</a>
+                        <a class="mui-control-item t_get_j" data-l="1" data-d="crowd-report-box" data-a="<?=appurl('crowd','getunion','crowd_id='.$crowd['id'])?>" href="#crowd-report-box">成员</a>
+                        <?php if($crowd['team']>0):?>
+                        <a class="mui-control-item t_get_j" data-l="1" data-d="crowd-team-box" data-a="<?=appurl('crowd','getteam','crowd_id='.$crowd['id'])?>" href="#crowd-team-box">队伍</a>
+                        <?php endif;?>
+                    </div>
+                </div>
+                <div class="crowd-ct-box">
+                    <div id="crowd-detail-box" class="mui-control-content mui-active">
+                        <div class="c_d_ct cr_detail">
+                            <div class="mui-loading">
+                                <div class="mui-spinner">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="crowd-march-box" class="mui-control-content">
+                        <div class="c_d_ct">
+                            <ul class="mui-table-view mui-table-view-striped mui-table-view-condensed">
+                            </ul>
+                        </div>
+                    </div>
+                    <div id="crowd-report-box" class="mui-control-content">
+                        <div class="c_d_ct">
+                            <!--测试-->
+                            <ul class="mui-table-view">
+
+                            </ul>
+                        </div>
+                    </div>
+                    <?php if($crowd['team']>0):?>
+                    <div id="crowd-team-box" class="mui-control-content">
+                        <div class="c_d_ct">
+                            <!--测试-->
+                            <ul class="mui-table-view">
+
+                            </ul>
+                        </div>
+                    </div>
+                    <?php endif;?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mui-row btm_menu">
+    <div class="mui-col-sm-2 mui-col-xs-2 collect-btn" data-bsid="<?=$crowd['id']?>" data-nfrom="1" data-title="<?=$crowd['title']?>" data-link="<?=appurl('crowd','detail','id='.$crowd['id'])?>" data-url="<?=appurl('collect','index')?>">
+        <?php if(!iscollect($crowd['id'],1)):?>
+        <span class="mui-icon-extra mui-icon-extra-heart"></span>
+        <?php else:?>
+        <span class="mui-icon-extra mui-icon-extra-heart-filled"></span>
+        <?php endif;?>
+    </div>
+    <?php if($stcls=='end'):?>
+    <div class="mui-col-sm-10 mui-col-xs-10 disabled"><span class="mui-icon mui-icon-closeempty"></span> 已结束</div>
+    <?php elseif($stcls=='nostart'): ?>
+    <div class="mui-col-sm-10 mui-col-xs-10 share-btn"><span class="mui-icon-extra mui-icon-extra-share"></span> 分享</div>
+    <?php else: ?>
+    <div class="mui-col-sm-4 mui-col-xs-4 share-btn"><span class="mui-icon-extra mui-icon-extra-share"></span> 分享</div>
+    <div class="mui-col-sm-6 mui-col-xs-6 jump_url" data-href="<?=appurl('crowd','unionenter','crowd_id='.$crowd['id'].'&team_id='.$team_id)?>">我要报名</div>
+    <?php endif; ?>
+</div>
+<script>
+    var teamcfg={
+        page:1,
+        lock:0,
+        limit:10,
+    };
+    var reportcfg={
+        page:1,
+        lock:0,
+        limit:10,
+    };
+    var posturl='';
+    var marchlock=0;
+    $(function(){
+        leftTimer('.c_timer');
+        var crowddetail=<?=json_encode(array('content'=>$crowd['content']))?>;
+        setTimeout(function() {
+            $('#crowd-detail-box .c_d_ct').html(crowddetail.content);
+        }, 500);
+        $('.t_get_j').on('tap',function(){
+            if($(this).data('l')==1){
+                posturl=$(this).data('a');
+                mscrollload($(this).data('d'));
+            }else if($(this).data('l')=='0'){
+                getmarch($(this).data('a'),$(this).data('d'));
+            }
+        });
+        $('.mui-content').scroll(function() {
+            $(".scroll-bar-box").each(function(){
+                var ttop = $(this).offset().top;
+                var tbox = $('.m_document').scrollTop();
+                var top = ttop-tbox;
+                if (top <= 0) {
+                    $(this).find('.scroll-bar').addClass('fixed_top');
+                }else{
+                    $(this).find('.scroll-bar').removeClass('fixed_top');
+                }
+            });
+
+        });
+    });
+    function get_json_data(dom,func){
+        if(dom=='crowd-report-box'){
+            var cfg=reportcfg;
+        }else if(dom=='crowd-team-box'){
+            var cfg=teamcfg;
+        }
+        if(cfg.lock==0){
+            cfg.lock=1;
+        }else{
+            return;
+        }
+        $('#'+dom).find('.c_d_ct').append('<div class="mui-loading"><div class="mui-spinner"></div></div>');
+        console.log(posturl,1);
+        $.getJSON(posturl,{page:cfg.page,limit:cfg.limit},function(d){
+            if(d.id==1){
+                setTimeout(function() {
+                    if(dom=='crowd-report-box'){
+                        $('#'+dom).find('.c_d_ct ul').append(tdomframe(d.data));
+                    }else if(dom=='crowd-team-box'){
+                        $('#'+dom).find('.c_d_ct ul').append(teamframe(d.data));
+                    }
+                    $('#'+dom).find('.c_d_ct .mui-loading').remove();
+                    var parr=d.page;
+                    if(parr[0]<=cfg.page){
+                        $('#'+dom).find('.c_d_ct').append('<div class="flow-more"><a href="javascript:;">没有更多了</a></div>');
+                        if(dom=='crowd-report-box'){
+                            reportcfg.lock=1;
+                        }else if(dom=='crowd-team-box'){
+                            teamcfg.lock=1;
+                        }
+                    }else{
+                        if(dom=='crowd-report-box'){
+                            reportcfg.lock=0;
+                            reportcfg.page++;
+                        }else if(dom=='crowd-team-box'){
+                            teamcfg.lock=0;
+                            teamcfg.page++;
+                        }
+                    }
+                }, 500);
+            }else{
+                $('#crowd-report-box').find('.c_d_ct .mui-loading').remove();
+                $('#crowd-report-box').find('.c_d_ct').append('<div class="flow-more"><a href="javascript:;">没有更多了</a></div>');
+            }
+        })
+    }
+    function tdomframe(d){
+        var html='';
+        for(var o in d) {
+            html+='<li class="mui-table-view-cell mui-media">'+
+                    '<a href="<?=appurl('crowd','uniondetail')?>&union_id='+d[o].id+'">'+
+                    '<img class="c_d_avatar mui-media-object mui-pull-left" src="'+(!d[o].avatar?'<?=MODULE_URL.'app/views/img/timg.jpg'?>':d[o].avatar)+'">'+
+                    '<div class="mui-media-body">'+
+                    '<b>'+d[o].nickname+'</b> 已筹 <span class="c_d_money">'+d[o].cjmoney+'</span>元'+
+                    '<p class="mui-ellipsis">'+d[o].summary+'</p>';
+            if(d[o].ravatar){
+            html+='<div class="rpt_li">';
+            var rptarr=(d[o].ravatar).split(',');
+            for(var o1 in rptarr){
+                html+='<dd class="rpt_ava"><img src="'+rptarr[o1]+'" width="100%"></dd>';
+            }
+            html+='</div>';
+            }
+            html+=  '<p class="mui-h6 mui-ellipsis">'+d[o].uaddtime+'</p>'+
+                    '</div>'+
+                    '</a>'+
+                    '</li>';
+
+        }
+        return html;
+    }
+    function mscrollload(dom){
+        if(dom=='crowd-report-box'){
+            var cfg=reportcfg;
+        }else if(dom=='crowd-team-box'){
+            var cfg=teamcfg;
+        }
+        get_json_data(dom,function () {
+            
+        });
+        $('.mui-content').scroll(function(){
+            if ($('.m_document').height() -$(this).scrollTop() - $(this).height()<200){
+                if(cfg.lock==1){
+                    return;
+                }
+                get_json_data(dom,function () {
+                    
+                });
+            }
+        });
+    }
+    function getmarch(purl,pdom){
+        if(marchlock==1){
+           return;
+        }
+        $('#'+pdom).find('.c_d_ct').append('<div class="mui-loading"><div class="mui-spinner"></div></div>');
+        $.getJSON(purl,function(d){
+            if(d.id==-1){
+                $('#'+pdom).find('.c_d_ct').append('<div class="flow-more"><a href="javascript:;">暂时还没有进展发布！</a></div>');
+            }else if(d.id==1){
+                var phtml='';
+                var pdata=d.data;
+                for(var o in pdata){
+                    phtml+='<li class="mui-table-view-cell">'+
+                        '<div class="mui-table">'+
+                        '<h4 class="mui-ellipsis">'+pdata[o].title+'</h4>'+
+                        '<h5>'+pdata[o].uaddtime+' <span class="mui-badge mui-badge-success">'+pdata[o].nfrom+'</span></h5>'+
+                        '<p class="mui-h6 mui-ellipsis">'+pdata[o].content+'</p>'+
+                        '</div>'+
+                        '</li>';
+                }
+                $('#'+pdom).find('.c_d_ct ul').append(phtml);
+                $('#'+pdom).find('.c_d_ct').append('<div class="flow-more"><a href="javascript:;">没有更多啦！</a></div>');
+            }
+            $('#'+pdom).find('.c_d_ct .mui-loading').remove();
+            marchlock=1;
+        })
+
+    }
+    function teamframe(d){
+        var html='';
+        for(var o in d) {
+            html+='<li class="mui-table-view-cell mui-media ">' +
+                '<a href="<?=appurl('crowd','teamview')?>&team_id='+d[o].id+'">'+
+                '<div class="mui-table">' +
+                '<div class="mui-table-cell mui-col-xs-10" style="text-align: left">' +
+                '<h5 class="mui-ellipsis">'+d[o].name+'</h5>' +
+                '<h5 class="mui-ellipsis">队长：'+(d[o].realname || '平台')+'</h5>' +
+                '<p class="mui-h6 mui-ellipsis">'+d[o].summary+'</p>' +
+                '</div>' +
+                '<div class="mui-table-cell mui-col-xs-2 mui-text-right">' +
+                '<span class="mui-h5">'+d[o].ucount+'人</span>' +
+                '</div>' +
+                '</div>' +
+                '</a>' +
+                '</li>';
+
+        }
+        return html;
+    }
+</script>
+<?php
+include('common/footer.html');
+?>

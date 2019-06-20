@@ -1,0 +1,232 @@
+<?php
+include('common/header.html');
+?>
+<style>
+    .crowd_li .mui-card-footer{
+        padding: 1rem 0;
+    }
+</style>
+<div class="mui-content page-crowd-list">
+    <div class="header mui-bar mui-bar-nav" style="height: 8rem;">
+        <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+        <div class="mui-input-row mui-search">
+            <input type="search" class="mui-input-clear search_ipt" placeholder="">
+        </div>
+        <a href="javascript:;" class="mui-action-menu mui-icon mui-icon-bars mui-pull-right show-catelist" ></a>
+        <div class="mui-segmented-control n_c_top mui-segmented-control-inverted mui-segmented-control-primary" style="margin: 0;top: -2px;font-size: 12px;font-weight: 100;">
+            <span class="mui-control-item fl-btn mui-active" data-fl="news" data-o="1">最新上线</span>
+            <span class="mui-control-item fl-btn" data-fl="viewnum" data-o="1">人气最佳</span>
+            <span class="mui-control-item fl-btn" data-fl="ppnum" data-o="1">参与人数</span>
+            <span class="mui-control-item fl-btn" data-fl="money" data-o="1">目标金额</span>
+        </div>
+    </div>
+    <div class="crowd_list" style="margin-top: 9rem;">
+
+    </div>
+    <div class="contact" style="text-align: center;padding: 3rem;">
+        <p class="f_t_txt">&copy;<?=@$sys['sysname']?$sys['sysname']:'一点众筹'?>版权所有</p>
+    </div>
+</div>
+<div id="catelist" class="mui-popover">
+    <div class="mui-popover-arrow"></div>
+    <div class="mui-scroll-wrapper">
+        <div class="mui-scroll">
+            <ul class="mui-table-view">
+                <li class="mui-table-view-cell pop_menu ct_btn" data-cid="0">全部</li>
+                <?php if(@is_array($category)):foreach($category as $c):?>
+                <li class="mui-table-view-cell pop_menu ct_btn" data-cid="<?=$c['id']?>"><?=$c['name']?></li>
+                <?php endforeach;endif;?>
+            </ul>
+        </div>
+    </div>
+</div>
+<script>
+    mui.init({
+        swipeBack: true //启用右滑关闭功能
+    });
+    mui('.mui-scroll-wrapper').scroll();
+    mui('body').on('shown', '.mui-popover', function(e) {
+        //console.log('shown', e.detail.id);//detail为当前popover元素
+    });
+    mui('body').on('hidden', '.mui-popover', function(e) {
+        //console.log('hidden', e.detail.id);//detail为当前popover元素
+    });
+    $('.show-catelist').on('tap',function(){
+        mui('#catelist').popover('toggle');
+    });
+    var page=1;
+    var limit=10;
+    var lock=0;
+    var cid=<?=$cid==''?0:$cid?>;
+    var key='<?=$key==''?'':$key?>';
+    var fl='viewnum';
+    $(function(){
+        loadcrowd();
+        $('.mui-content').scroll(function(){
+            if ($('.m_document').height() -$(this).scrollTop() - $(this).height()<200){
+                loadcrowd();
+            }
+        });
+        $('.ct_btn').on('click',function(){
+            $('.ct_btn').removeClass('active');
+            $(this).addClass('active');
+            mui('#catelist').popover('hide');
+            page=1;
+            lock=0;
+            key='';
+            fl='';
+            cid=$(this).data('cid');
+            $('.crowd_list').html('');
+            loadcrowd();
+        });
+        $('.fl-btn').on('tap',function(){
+            $('.fl-btn').removeClass('mui-active');
+            $(this).addClass('mui-active');
+            if(fl!=$(this).data('fl')){
+                fl=$(this).data('fl');
+                $(this).data('o','1');
+            }else{
+                if($(this).data('o')==1){
+                    $(this).data('o','0');
+                }else{
+                    $(this).data('o','1');
+                }
+            }
+            var od=$(this).data('o');
+            page=1;
+            lock=0;
+            cid=0;
+            key='';
+            $('.crowd_list').html('');
+            loadcrowd(od);
+        });
+        $(".search_ipt").on('keypress',function(e) {
+            var keycode = e.keyCode;
+            if(keycode=='13') {
+                e.preventDefault();
+                var keytxt=$(this).val();
+                page=1;
+                lock=0;
+                cid=0;
+                key=keytxt;
+                $('.crowd_list').html('');
+                loadcrowd();
+            }
+        });
+        $(".search_ipt").on('change',function(){
+            var keytxt=$(this).val();
+            if(keytxt=='' && key!=''){
+                page=1;
+                lock=0;
+                key='';
+                cid=0;
+                $('.crowd_list').html('');
+                loadcrowd();
+            }
+        })
+    })
+    function loadcrowd(od){
+        if(lock==1){
+            return;
+        }else{
+            lock=1;
+        }
+        if(!od){
+            od=1;
+        }
+        var pdata={page:page,limit:limit,od:od};
+        if(cid>0){
+            pdata.cid=cid;
+        }
+        if(key!=''){
+            pdata.key=key;
+        }
+        if(fl!=''){
+            pdata.fl=fl;
+        }
+        $('.crowd_list').append('<div class="mui-loading"><div class="mui-spinner"></div></div>');
+        $.getJSON("<?=appurl('crowd','getcrowd')?>",pdata,function(d){
+            if(d.id==1){
+                putcrowdlist(d.data);
+                lock=0;
+            }else{
+                lock=1;
+                $('.crowd_list').append('<div class="flow-more"><a href="javascript:;">没有更多啦！</a></div>');
+            }
+            $('.crowd_list').find('.mui-loading').remove();
+        })
+    }
+    function putcrowdlist(d){
+        var html='';
+        for(var o in d){
+            var taghtml='';
+            if(d[o].rcount>0){
+                taghtml+='[回报]';
+            }
+            if(d[o].ntype==1){
+                taghtml+='[联合]';
+            }
+            var nfromt='官方';
+            if(d[o].nfrom==2){
+                nfromt='企业/机构';
+            }else if(d[o].nfrom==1){
+                nfromt='个人';
+            }
+            taghtml+='['+d[o].cname+']';
+            var faceimgarr=eval("("+d[o].coverimg+")");
+            html+='<div class="mui-card crowd_li jump_url_s" data-href="<?=appurl('crowd','detail')?>&id='+d[o].id+'">'+
+            '<div>'+
+            '<div  class="cr_tit">'+
+            '<h4 class="l_t"><span class="l_t_cat">'+taghtml+'</span>'+d[o].title+'</h4>'+
+            '</div>'+
+            '</div>'+
+            '<div class="cr-face">'+
+            '<img src="'+(!faceimgarr?'':window.sysinfo.attachurl+faceimgarr[0])+'" alt="" width="100%">'+
+            '</div>'+
+            '<div class="mui-card-footer">'+
+            '<div class="c_fd mui-row">'+
+            '<div class="mui-col-sm-6 mui-col-xs-6">'+nfromt+'<span class="f_t_txt">发起</span></div>'+
+            '   <div class="mui-col-sm-6 mui-col-xs-6">'+
+            '   <span class="f_t_txt right">'+d[o].cstarttime+'</span>'+
+            '</div>'+
+            '</div>'+
+            '<div class="c_att mui-row">'+
+            '    <div class="mui-col-sm-4 mui-col-xs-4">'+
+            '   <dl>'+
+            '   <dh class="u_d_tit f_t_txt">目标金额</dh>'+
+            '   <dd class="u_d_ct">￥'+d[o].money+'</dd>'+
+            '</dl>'+
+            '</div>'+
+            '<div class="mui-col-sm-4 mui-col-xs-4">'+
+            '   <dl>';
+            if(d[o].ntype==0){
+                html+='<dh class="u_d_tit f_t_txt">已筹金额</dh>'+
+                    '<dd class="u_d_ct">￥'+d[o].cjmoney+'</dd>';
+            }else{
+                html+='<dh class="u_d_tit f_t_txt">报名人数</dh>'+
+                    '<dd class="u_d_ct">'+d[o].bmnum+'</dd>';
+            }
+            html+='   </dl>'+
+                '</div>'+
+                '<div class="mui-col-sm-4 mui-col-xs-4">'+
+                '    <dl>'+
+                '    <dh class="u_d_tit f_t_txt">参与人数</dh>'+
+                '    <dd class="u_d_ct">'+d[o].ppnum+'</dd>'+
+                '</dl>'+
+                '</div>'+
+                '</div>'+
+                '</div>'+
+                '</div>';
+        }
+        $('.crowd_list').append(html);
+        $('.jump_url_s').on('click',function(){
+            location.href=$(this).data('href');
+        })
+        page++;
+    }
+</script>
+
+<?php
+include('common/bottom.html');
+include('common/footer.html');
+?>

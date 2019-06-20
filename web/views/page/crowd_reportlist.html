@@ -1,0 +1,85 @@
+<div class="page-title">
+    <div class="page-breadcrumb">
+        <ol class="breadcrumb">
+            <li><a href="<?=weburl('home','index')?>">首页</a></li>
+            <li><a href="<?=weburl('crowd','clist')?>">众筹</a></li>
+            <?php if($crowd['ntype']=='1'):?>
+            <li><a href="<?=weburl('crowd','bmlist','crowd_id='.$crowd['id'])?>">报名列表</a></li>
+            <?php endif; ?>
+            <li class="active">支持列表</li>
+        </ol>
+    </div>
+</div>
+<div id="main-wrapper">
+    <div class="row m-t-md">
+        <div class="col-md-12">
+            <div class="row orderbox-header">
+                <div class="col-md-2">
+                    <?php if($crowd['ntype']=='0'):?>
+                    <a href="<?=weburl('crowd','rewardlist','id='.$crowd['id'])?>" class="btn btn-success btn-block">回报处理</a>
+                    <?php endif; ?>
+                </div>
+                <div class="col-md-6">
+                    <h2><?=$crowd['title']?></h2>
+                </div>
+                <div class="col-md-4">
+
+                        <div class="input-group">
+                            <input type="text" class="form-control input-search search_order_input" placeholder="用户ID、昵称/订单号">
+                            <span class="input-group-btn">
+                                                <button class="btn btn-success search_order" type="button"><i class="fa fa-search"></i></button>
+                                            </span>
+                        </div><!-- Input Group -->
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <ul class="list-unstyled orderbox-nav">
+                <li class="filter_order active" data-st="all"><a href="javascript:;"><i class="fa fa-inbox"></i>全部</a></li>
+                <li class="filter_order" data-st="1"><a href="javascript:;"><i class="fa fa-sign-in"></i>已支付</a></li>
+                <li class="filter_order" data-st="0"><a href="javascript:;"><i class="fa fa-file-text-o"></i>待付款</a></li>
+                <li class="filter_order" data-st="-1"><a href="javascript:;"><i class="fa fa-remove"></i>已取消</a></li>
+                <li class="filter_order" data-st="-2"><a href="javascript:;"><i class="fa fa-sign-out"></i>已退款</a></li>
+            </ul>
+        </div>
+        <div class="col-md-10">
+            <div class="orderbox-content report_box">
+                正在加载中...
+            </div>
+        </div>
+    </div><!-- Row -->
+</div>
+<div class="modal fade crowd_order_reply_md" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="mySmallModalLabel">退款说明</h4>
+            </div>
+            <div class="modal-body">
+                <form action="<?=weburl('crowd','order_reply','crowd_id='.$crowd['id'].(isset($crowd_union['id'])?'&union_id='.$crowd_union['id']:''))?>" id="order-reply-id">
+                    <input type="hidden" value="" name="order_id">
+                </form>
+                确认退款后，用户支持的金额将原路返回用户微信，并无法找回，操作前请再三确认此操作的合法性！
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default order-md-dismiss" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success reply_sub">确认退款选中订单</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="loadding do-loading" style="display: none;">
+    <div class="l-bg"></div>
+    <div class="icon-txt">正在退款中，请勿进行其他操作...</div>
+</div>
+<script>
+    var loadurl='<?=weburl('crowd','orderjson')?>';
+    var downloadurl='<?=weburl('crowd','download')?>';
+    var crowd_id=<?=$crowd['id']?>;
+    var union_id='';
+    var team_id='';
+    <?=isset($crowd_union['id'])?'union_id='.$crowd_union['id'].';':''?>
+    <?=isset($crowd_team['id'])?'team_id='.$crowd_team['id'].';':''?>
+</script>

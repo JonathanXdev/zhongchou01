@@ -1,0 +1,158 @@
+<?php
+include('common/header.html');
+?>
+<style>
+#up-avatar{
+
+    float: right;
+    width: 65%;
+    height: 8rem;
+
+}
+#up-avatar .webuploader-pick{
+    height: 6rem;
+    width: 6rem;
+    margin: 1rem;
+    padding: 0!important;
+    }
+#up-avatar .up-view{
+    width: 6rem;
+}
+.code-btn{
+    position: absolute;
+    right: 0;
+    border-radius: 0;
+    width: auto!important;
+    bottom: 0;
+    top: 1px;
+    border: none;
+    border-left: 1px solid #ddd;
+}
+</style>
+<div class="mui-bar mui-bar-nav">
+    <h1 class="mui-title"><?=$ff=='phone'?'验证手机':($ff=='vali'?'个人信息认证':'我的信息')?></h1>
+    <a class="mui-icon mui-icon-left-nav mui-pull-left jump_url" data-href="<?=appurl('user','index')?>"></a>
+</div>
+<div class="mui-content user-edit">
+    <div class="mui-content-padded" style="margin: 5rem 1rem;">
+        <form class="mui-input-group user-form" action="<?=appurl('user','subedit')?>">
+            <?php if($ff=='df'):?>
+            <div class="mui-input-row">
+                <label>真实姓名</label>
+                <input type="text" placeholder="真实姓名" value="<?=@$user['name']!=''?$user['name']:''?>" name="name">
+            </div>
+            <div class="mui-input-row" style="height: 8rem;">
+                <label>上传头像</label>
+                <input name="avatar" type="hidden" value="<?=@$user['avatar']!=''?$user['avatar']:(@$w['fans']['tag']['avatar']==''?'':$w['fans']['tag']['avatar'])?>">
+                <div id="up-avatar">
+                    <img src="<?=@$user['avatar']!=''?$user['avatar']:(@$w['fans']['tag']['avatar']==''?MODULE_URL.'app/views/img/timg.jpg':$w['fans']['tag']['avatar'])?>" class="up-view">
+                </div>
+            </div>
+            <div class="mui-button-row">
+                <button type="button" class="mui-btn mui-btn-primary sub-user-edit">提交</button>&nbsp;&nbsp;
+                <button type="button" class="mui-btn mui-btn-danger" onclick="history.go(-1)">取消</button>
+            </div>
+            <?php endif;?>
+            <?php if($ff=='phone'):?>
+            <div class="mui-input-row" style="position: relative">
+                <label>手机号码</label>
+                <input type="text" placeholder="手机号码" value="<?=@$user['phone']!=''?$user['phone']:''?>" <?=@$user['phoneak']=='1'?'readonly':''?>  name="phone">
+                <span class="mui-btn getcode code-btn">获取验证码</span>
+            </div>
+            <div class="mui-input-row" style="position: relative">
+                <label>验证码</label>
+                <input type="text" placeholder="请输入验证码" name="code">
+            </div>
+            <div class="mui-button-row">
+                <button type="button" class="mui-btn mui-btn-primary sub-user-edit"><?=@$user['phoneak']=='1'?'解绑':'绑定'?></button>&nbsp;&nbsp;
+                <button type="button" class="mui-btn mui-btn-danger" onclick="history.go(-1)">取消</button>
+            </div>
+            <?php endif;?>
+            <?php if($ff=='vali'):?>
+            <div class="mui-input-row">
+                <label>真实姓名</label>
+                <input type="text" placeholder="真实姓名" value="<?=@$user['name']!=''?$user['name']:''?>" name="name">
+            </div>
+            <div class="mui-input-row" style="position: relative">
+                <label>手机号码</label>
+                <input type="text" placeholder="手机号码" value="<?=@$user['phone']!=''?$user['phone']:''?>" <?=@$user['phoneak']=='1'?'readonly':''?>  name="phone">
+                <span class="mui-btn getcode code-btn">获取验证码</span>
+            </div>
+            <div class="mui-input-row" style="position: relative">
+                <label>验证码</label>
+                <input type="text" placeholder="请输入验证码" name="code">
+            </div>
+            <div class="mui-button-row">
+                <button type="button" class="mui-btn mui-btn-primary sub-user-edit">提交认证</button>&nbsp;&nbsp;
+                <button type="button" class="mui-btn mui-btn-danger" onclick="history.go(-1)">取消</button>
+            </div>
+            <?php endif;?>
+        </form>
+    </div>
+</div>
+<script>
+    var countdown=0;
+    var islock=false;
+    var timer1;
+    $(function(){
+        util.image($('#up-avatar'), function(d){
+            $('input[name=avatar]').val(d.url);
+            $('#up-avatar .up-view').attr('src',d.url)
+        }, {crop :true,preview :true})
+        $('.sub-user-edit').on('tap',function(){
+            var forms=$('.user-form');
+            console.log(forms.attr('action'),forms.serialize());
+            $.post(forms.attr('action'),forms.serialize(),function(d){
+                if(d.id==1){
+                    <?php if(@$fromurl==''):?>
+                    window.history.go(-1);
+                    <?php else:?>
+                    location.href='<?=$fromurl?>';
+                    <?php endif;?>
+                }else{
+                    mui.alert(d.msg);
+                }
+            },'json')
+        });
+        $('.getcode').on('click',function(){
+            var that=this;
+            if(islock===true){
+                return false;
+            }else{
+                var phone=$('input[name=phone]').val();
+                var reg = /^1[0-9]{10}$/;
+                var flag = reg.test(phone);
+                if(flag==false){
+                    mui.alert('请输入有效的手机号码');
+                    return;
+                }
+                $.post('<?=appurl("user","sendsms")?>',{phone:phone},function(d){
+                    if(d.id==1){
+                        islock=true;
+                        settime(that);
+                    }else{
+                        mui.alert(d.msg);
+                    }
+                },'json');
+
+            }
+        })
+    });
+    function settime(val) {
+        if (countdown == 0) {
+            window.clearTimeout(timer1);
+            islock==false;
+            $(val).text("获取验证码");
+            countdown = 60;
+        }else {
+            $(val).text("重新发送(" + countdown + ")");
+            countdown--;
+        }
+        timer1=setTimeout(function() {
+            settime(val)
+        },1000)
+    }
+</script>
+<?php
+include('common/footer.html');
+?>

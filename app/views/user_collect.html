@@ -1,0 +1,88 @@
+<?php
+include('common/header.html');
+?>
+<div class="mui-bar mui-bar-nav">
+    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+    <h1 class="mui-title">我的收藏列表</h1>
+</div>
+<div class="mui-content user-collect">
+    <div class="m_document">
+        <div class="collect-box">
+            <ul id="collect-box" class="mui-table-view">
+
+            </ul>
+        </div>
+    </div>
+</div>
+<script>
+    var page=1;
+    var limit=20;
+    var lock=0;
+$(function(){
+    loadcollect();
+    $('.mui-content').scroll(function(){
+        if ($('.m_document').height() -$(this).scrollTop() - $(this).height()<200){
+            loadcollect();
+        }
+    });
+})
+function loadcollect(){
+    if(lock==1){
+        return;
+    }else{
+        lock=1;
+    }
+    $('.collect-box').append('<div class="mui-loading"><div class="mui-spinner"></div></div>');
+    $.getJSON("<?=appurl('user','collectjson')?>",{page:page,limit:limit},function(d){
+        if(d.id==1){
+            putcollectlist(d.data);
+            lock=0;
+        }else{
+            lock=1;
+            $('.collect-box').append('<div class="flow-more"><a href="javascript:;">没有更多了</a></div>');
+        }
+        $('.collect-box').find('.mui-loading').remove()
+    })
+}
+function putcollectlist(d){
+    var html='';
+        for(var o in d){
+            html+='<li class="mui-table-view-cell cl_li" >'+
+                '<div class="mui-slider-right mui-disabled">'+
+                '<a class="mui-btn mui-btn-red del-collect" data-id="'+d[o].id+'">删除</a>'+
+                '</div>'+
+                '<div class="mui-slider-handle jumps_url" data-href="'+d[o].link+'">'+
+                '<div class="mui-table">'+
+                '<div class="mui-table-cell mui-col-xs-10">'+
+                '<h4 class="mui-ellipsis">'+d[o].title+'</h4>';
+            if(d[o].nfrom=='1'){
+                var fmtxt='众筹';
+            }else if(d[o].nfrom=='2'){
+                var fmtxt='他人参与的众筹';
+            }
+            html+='<p class="mui-h6 mui-ellipsis">来自：'+fmtxt+'收藏</p>'+
+                '<p class="mui-h6 mui-ellipsis">'+d[o].uaddtime+'</p>'+
+                '</div>'+
+                '</div>'+
+                '</div>'+
+                '</li>';
+        }
+        $('#collect-box').append(html);
+        $('.jumps_url').on('click',function(){
+            location.href=$(this).data('href');
+        })
+        $('.del-collect').on('click',function(){
+            var clid=$(this).data('id');
+            var cldom=$(this)
+            $.getJSON("<?=appurl('user','delcollect')?>",{id:clid},function(d){
+                if(d.id==1){
+                    cldom.parents('.cl_li').remove();
+                }
+            });
+        })
+    page++;
+}
+</script>
+<?php
+include('common/footer.html');
+?>

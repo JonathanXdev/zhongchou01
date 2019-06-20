@@ -1,0 +1,85 @@
+
+<script>
+    $('.date-picker').datepicker({
+        format: 'yyyy-mm-dd',
+        language:"zh",
+        orientation: "top auto",
+        autoclose: true
+    });
+</script>
+<div id="main-wrapper">
+    <div class="row">
+        <div class="panel panel-dark">
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <div class="dataTables_wrapper project-stats">
+                        <div class="col-md-12">
+                            <div class="col-md-4">
+                                <input type="text" name="fst" value="" class="form-control date-picker" placeholder="开始时间">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" name="fed" value="" class="form-control date-picker" placeholder="结束时间">
+                            </div>
+                            <button class="btn btn-default" id="search-btn">查询</button>
+                            <button class="btn btn-default" id="download-btn"><i class="fa fa-download"></i></button>
+                        </div>
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>支持总次数</th>
+                                <th>筹款总额</th>
+                            </tr>
+                            </thead>
+                            <tbody class="log-box">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- Main Wrapper -->
+<script>
+
+    $(function(){
+        getlog();
+        $('.date-picker').datepicker({
+            format: 'yyyy-mm-dd',
+            language:"zh",
+            orientation: "top auto",
+            autoclose: true
+        });
+        $('#search-btn').on('click',function(){
+            var fst=$('input[name=fst]').val();
+            var fed=$('input[name=fed]').val();
+            getlog(fst,fed);
+        })
+        $('#download-btn').on('click',function(){
+            var fst=$('input[name=fst]').val();
+            var fed=$('input[name=fed]').val();
+            window.open('<?=weburl("crowd","statjson","ff=down&crowd_id=".$crowd["id"])?>'+(fst!=''?'&starttime='+fst:'')+(fed!=''?'&endtime='+fed:''));
+        });
+    });
+    function getlog(fst,fed){
+        $.getJSON('<?=weburl("crowd","statjson","crowd_id=".$crowd["id"])?>',{starttime:fst,endtime:fed},function (d) {
+            if(d.id==-1){
+                toastr.info(d.msg)
+            }else{
+                console.log(d);
+                var html='';
+                var odata=d.data;
+                for(var o in odata){
+                    html+='<tr>' +
+                        '<td>'+odata[o].addtime+'</td>' +
+                        '<td>'+odata[o].ppnum+'</td>' +
+                        '<td>'+odata[o].money+'元</td>' +
+                        '</tr>'
+                }
+                $('.log-box').html(html);
+            }
+        })
+    }
+
+</script>

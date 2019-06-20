@@ -1,0 +1,25 @@
+<?php
+$mc=$this->input->get('mc');
+$mm=$this->input->get('mm');
+?>
+<nav class="mui-bar mui-bar-tab">
+    <span class="mui-tab-item jump_url <?=$mc=='home'?'mui-active':''?>" data-href="<?=appurl('home','index')?>">
+        <span class="mui-icon iconfont icon-31shouye"></span>
+        <span class="mui-tab-label">首页</span>
+    </span>
+	<span class="mui-tab-item jump_url <?=$mc=='crowd'?'mui-active':''?>" data-href="<?=appurl('crowd','index')?>">
+        <span class="mui-icon iconfont icon-fenlei1"></span>
+        <span class="mui-tab-label">全部众筹</span>
+    </span>
+    <span class="menu-b-c mui-tab-item jump_url <?=$mc=='mycrowd'?'mui-active':''?>" data-href="<?=appurl('mycrowd','start')?>">
+        <span class="mui-icon mui-icon-plusempty"></span>
+    </span>
+	<span class="mui-tab-item jump_url <?=$mc=='user' && $mm=='msg'?'mui-active':''?>" data-href="<?=appurl('user','msg')?>">
+		<span class="mui-icon iconfont icon-31xiaoxi"><span class="mui-badge"><?=msgcount()?></span></span>
+		<span class="mui-tab-label">消息</span>
+	</span>
+	<span class="mui-tab-item jump_url <?=$mc=='user' && $mm=='index'?'mui-active':''?>" data-href="<?=appurl('user','index')?>">
+        <span class="mui-icon iconfont icon-mine"></span>
+        <span class="mui-tab-label">会员中心</span>
+    </span>
+</nav>

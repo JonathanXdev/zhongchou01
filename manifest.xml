@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns="http://www.we7.cc" versionCode="">
+	
+	<application setting='false'>
+		<name><![CDATA[亿恒众筹]]></name>
+
+		<identifie><![CDATA[yh_zhongchou]]></identifie>
+
+		<version><![CDATA[2.6.7]]></version>
+
+		<ability><![CDATA[众筹系统]]></ability>
+
+		<type><![CDATA[other]]></type>
+
+		<description><![CDATA[众筹系统，原完*美众筹]]></description>
+
+		<author><![CDATA[亿恒团队]]></author>
+
+		<url><![CDATA[http://www.095486.cn]]></url>
+
+	</application>
+
+
+	<platform>
+		<handles>
+		</handles>
+		<rule embed="false" />
+		<card embed="false" />
+	<supports>
+			<item type="app" />
+	</supports>
+
+	</platform>
+
+
+	<bindings>
+
+	</bindings>
+
+	<install><![CDATA[install.php]]></install>
+	<uninstall><![CDATA[uninstall.php]]></uninstall>
+	<upgrade><![CDATA[upgrade.php]]></upgrade>
+</manifest>

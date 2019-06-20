@@ -1,0 +1,100 @@
+<div class="page-title">
+    <div class="page-breadcrumb">
+        <ol class="breadcrumb">
+            <li><a href="<?=weburl('home','index')?>">首页</a></li>
+            <li class="active">众筹分类</li>
+        </ol>
+    </div>
+</div>
+<div id="main-wrapper">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-white">
+                <div class="panel-body">
+                    <div style="float: right; margin-bottom: 10px">
+                        <button id="add-category" class="btn btn-default" data-toggle="modal" data-target=".bs-example-modal-sm">新增分类</button>
+                    </div>
+                    <table id="user" class="table table-bordered table-striped" style="clear: both">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>排序</th>
+                            <th>分类名</th>
+                            <th>描述</th>
+                            <th>图标</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php if(is_array($category)):foreach($category as $c):?>
+                        <tr>
+                            <td><?=$c['id']?></td>
+                            <td><a href="#" data-type="text" data-pk="<?=$c['id']?>" data-title="输入数字，越大排名越靠前" class="category-order editable editable-click" style="display: inline;"><?=$c['norder']?></a></td>
+                            <td><a href="#" data-type="text" data-pk="<?=$c['id']?>" data-title="输入众筹分类名称" class="editable editable-click category-name" style="display: inline;"><?=$c['name']?></a></td>
+                            <td><a href="#" data-type="textarea" data-pk="<?=$c['id']?>" data-title="输入分类描述" class="editable editable-click category-content" style="display: inline;"><?=$c['content']?></a></td>
+                            <td><a href="javascript:;" data-pk="<?=$c['id']?>" class="category-icon" style="display: inline;"><img src="<?=@tomedia($c['icon'])?>" width="80px"></a></td>
+                            <td><button data-pk="<?=$c['id']?>" class="btn btn-danger btn-rounded category-del">删除</button></td>
+                        </tr>
+                        <?php endforeach;endif;?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- Main Wrapper -->
+<div class="modal fade bs-example-modal-sm in" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="mySmallModalLabel">新增分类</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" name="category-form" id="category-form">
+                    <div class="form-group">
+                            <input type="text" class="form-control" name="name" id="name" placeholder="分类名称">
+                    </div>
+                    <div class="form-group">
+                        <input type="number" name="norder" class="form-control" id="norder" placeholder="排序，值越大越靠前，默认0">
+                    </div>
+                    <div class="form-group">
+                        <?=@tpl_form_field_image('icon')?>
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="分类描述" name="content" class="form-control"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success" id="category-sub">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var editurl='<?=weburl('crowd','editcategory')?>';
+    var delurl='<?=weburl('crowd','delcategory')?>';
+    $(function(){
+        $('.category-icon').on('click',function(){
+            uploaimage(this)
+        })
+    })
+
+    function uploaimage(elm) {
+        var name = $(elm).next().val();
+        var data={};
+        data.pk=$(elm).data('pk');
+        data.name='icon';
+        util.image('', function(urls){
+            data.value=urls.attachment;
+            $.post(editurl,data,function(d){
+                if(d.id==1){
+                    location.reload();
+                }
+            },'json');
+            console.log(data);
+        });
+    }
+</script>

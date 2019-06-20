@@ -1,0 +1,75 @@
+<?php
+include('common/header.html');
+?>
+<div class="mui-bar mui-bar-nav">
+    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+    <h1 class="mui-title">消息列表</h1>
+</div>
+<div class="mui-content user-collect">
+    <div class="m_document">
+        <div class="msg-box">
+            <ul id="msg-box" class="mui-table-view">
+
+            </ul>
+        </div>
+    </div>
+</div>
+<script>
+    var page=1;
+    var limit=20;
+    var lock=0;
+$(function(){
+    loadmsg();
+    $('.mui-content').scroll(function(){
+        if ($('.m_document').height() -$(this).scrollTop() - $(this).height()<200){
+            loadmsg();
+        }
+    });
+})
+function loadmsg(){
+    if(lock==1){
+        return;
+    }else{
+        lock=1;
+    }
+    $('.msg-box').append('<div class="mui-loading"><div class="mui-spinner"></div></div>');
+    $.getJSON("<?=appurl('user','msgjson')?>",{page:page,limit:limit},function(d){
+        if(d.id==1){
+            putmsglist(d.data);
+            lock=0;
+        }else{
+            lock=1;
+            $('.msg-box').append('<div class="flow-more"><a href="javascript:;">没有更多了</a></div>');
+        }
+        $('.msg-box').find('.mui-loading').remove()
+    })
+}
+function putmsglist(d){
+    var html='';
+        for(var o in d){
+            html+='<li class="mui-table-view-cell mui-collapse" '+(d[o].status=='1'?'style="color:#ddd"':'')+'>' +
+                '<a class="mui-navigate-right getmsg" data-id="'+d[o].id+'" href="javascript:;">'+d[o].title+'</a>' +
+                '<div class="mui-collapse-content">' +
+                '<h4>'+d[o].title+'</h4>' +
+                '<p>'+d[o].msg+'</p>' +
+                '<h6>'+d[o].uaddtime+'</h6>' +
+                '</div>' +
+                '</li>';
+        }
+        $('#msg-box').append(html);
+
+        $('.getmsg').on('tap',function(){
+            var id=$(this).data('id');
+            var that=this;
+            $.getJSON("<?=appurl('user','getmsg')?>",{id:id},function(d){
+                if(d.id==1){
+                    $(that).parents('li').css({'color':'#ddd'});
+                }
+            });
+        })
+    page++;
+}
+</script>
+<?php
+include('common/footer.html');
+?>

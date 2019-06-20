@@ -1,0 +1,166 @@
+<?php
+include('common/header.html');
+?>
+<style>
+    .crowd_li .mui-card-footer{
+        padding: 1rem 0;
+    }
+    .m-c-list{
+
+    }
+    .m-c-li{
+        margin: 1rem 0;
+        border-radius: 0;
+        border: none;
+    }
+    .m-c-li .mui-card-media{
+        padding:0;
+    }
+    .m-c-btn{
+        text-align: center;
+        color: #fff;
+        background: #33d3c0;
+        font-size: 1.2rem;
+    }
+    .m-c-btn.display{
+        color: #555;
+        background: #ddd;
+    }
+</style>
+<div id="segmentedControl" class="mui-segmented-control mui-segmented-control-inverted mui-segmented-control-primary">
+    <span class="mui-control-item st_btn mui-active" data-st="0">未完成</span>
+    <span class="mui-control-item st_btn" data-st="1">待审核</span>
+    <span class="mui-control-item st_btn" data-st="2">未开始</span>
+    <span class="mui-control-item st_btn" data-st="3">进行中</span>
+    <span class="mui-control-item st_btn" data-st="4">已结束</span>
+</div>
+<div class="mui-content page-crowd-list" style="top:4rem;">
+    <div class="m_document">
+        <div class="m_c_list crowd_list">
+
+        </div>
+    </div>
+    <div class="contact" style="text-align: center;padding: 3rem;">
+        <p class="f_t_txt">&copy;<?=@$sys['sysname']?$sys['sysname']:'一点众筹'?>版权所有</p>
+    </div>
+</div>
+<script>
+    var page=1;
+    var limit=10;
+    var lock=0;
+    var st=0;
+    $(function(){
+        loadcrowd();
+        $('.mui-content').scroll(function(){
+            if ($('.m_document').height() -$(this).scrollTop() - $(this).height()<200){
+                loadcrowd();
+            }
+        });
+        $('.st_btn').on('tap',function(){
+            page=1;
+            lock=0;
+            st=$(this).data('st');
+            $('.crowd_list').html('');
+            loadcrowd();
+        });
+    });
+    function loadcrowd(){
+        if(lock==1){
+            return;
+        }else{
+            lock=1;
+        }
+        var pdata={page:page,limit:limit};
+            pdata.st=st;
+        $('.crowd_list').append('<div class="mui-loading"><div class="mui-spinner"></div></div>');
+        $.getJSON("<?=appurl('mycrowd','getmycrowd')?>",pdata,function(d){
+            if(d.id==1){
+                putcrowdlist(d.data);
+                lock=0;
+            }else{
+                lock=1;
+                $('.crowd_list').append('<div class="flow-more"><a href="javascript:;">没有更多啦！</a></div>');
+            }
+            $('.crowd_list').find('.mui-loading').remove();
+        })
+    }
+    function putcrowdlist(d){
+        var html='';
+        for(var o in d){
+            var faceimgarr=(!d[o].coverimg?'':eval("("+d[o].coverimg+")"));
+            html+='<div class="mui-card m-c-li">'+
+                '<div class="mui-card-header mui-card-media" style="max-height:40vw">'+
+                (faceimgarr!=''?'<img src="'+window.sysinfo.attachurl+faceimgarr[0]+'" width="100%">':'')+
+                '</div>'+
+                '<div class="mui-card-content">'+
+                '<div class="mui-card-content-inner">';
+            if(st>=2){
+                html+='<p class="f_t_txt">时间：'+d[o].starttime+' 至 '+d[o].endtime+'</p>';
+                html+='<div class="mui-row">' +
+                    '<div class="mui-col-sm-12 mui-col-xs-12 f_t_txt">状态：<span class="mui-badge mui-badge-'+(d[o].status==1?'success':'')+'">'+(d[o].status==1?'已上线':'未上线')+'</span></div>' +
+                    '<div class="mui-col-sm-6 mui-col-xs-6 f_t_txt">目标金额：'+d[o].money+'元</div>' +
+                    '<div class="mui-col-sm-6 mui-col-xs-6 f_t_txt">已筹金额：'+d[o].cjmoney+'元</div>';
+                if(d[o].ntype==0){
+                html+='<div class="mui-col-sm-6 mui-col-xs-6 f_t_txt">参与人数：'+d[o].ppnum+'人</div>';
+                }else if(d[o].ntype==1){
+                    html+='<div class="mui-col-sm-6 mui-col-xs-6 f_t_txt">报名人数：'+d[o].bmnum+'人</div>';
+                }
+                html+='</div>';
+            }else{
+                html+='<p class="f_t_txt">最后编辑时间 '+d[o].lasttime+'</p>';
+            }
+                html+='<p style="color: #333;">'+(!d[o].title?'项目未完成，请继续编辑':d[o].title)+'</p>'+
+                '</div>'+
+                '</div>'+
+                '<div class="mui-card-footer">'+
+                '<div class="mui-row">'+
+                '<div class="mui-col-sm-6 mui-col-xs-6" style="padding-right: 20px;">'+
+                '</div>'+
+                '<div class="mui-col-sm-6 mui-col-xs-6 mui-row">';
+            if(d[o].status==0 && st<2){
+                html+='<span class="mui-col-sm-6 mui-col-xs-6 m-c-btn display c-rm-btn" data-id="'+d[o].id+'">删除</span>';
+                html+='<span class="mui-col-sm-6 mui-col-xs-6 m-c-btn jump_url_s" data-href="<?=appurl('mycrowd','start')?>&id='+d[o].id+'">编辑</span>';
+            }else if(d[o].status==-1 && st<2){
+                html+='<span class="mui-col-sm-12 mui-col-xs-12 m-c-btn display c-rm-btn" data-id="'+d[o].id+'">请删除</span>';
+            }else if(d[o].status==1 && st<2){
+                html+='<span class="mui-col-sm-12 mui-col-xs-12 m-c-btn c-reply-btn" data-id="'+d[o].id+'">撤回</span>';
+            }else if(st>=2){
+                html+='<span class="mui-col-sm-7 mui-col-xs-7 m-c-btn display">无法编辑/删除</span><span class="mui-col-sm-5 mui-col-xs-5 m-c-btn jump_url_s" data-href="<?=appurl('crowd','detail')?>&id='+d[o].crowd_id+'">查看</span>';
+            }
+
+            html+='</div>'+
+                '</div>'+
+                '</div>'+
+                '</div>';
+        }
+        $('.crowd_list').append(html);
+        $('.jump_url_s').on('click',function(){
+            location.href=$(this).data('href');
+        });
+        $('.c-rm-btn').unbind('click').on('click',function(){
+            var that=this;
+            $.getJSON("<?=appurl('mycrowd','del')?>",{id:$(this).data('id')},function(dd){
+                if(dd.id==1){
+                    $(that).parents('.m-c-li').remove();
+                }else{
+                    mui.alert(d.msg);
+                }
+            });
+        });
+        $('.c-reply-btn').unbind('click').on('click',function(){
+            var that=this;
+            $.getJSON("<?=appurl('mycrowd','reply')?>",{id:$(this).data('id')},function(dd){
+                console.log(dd);
+                if(dd.id==1){
+                    $(that).parents('.m-c-li').remove();
+                }
+                mui.alert(dd.msg);
+            });
+        })
+        page++;
+    }
+</script>
+<?php
+include('common/bottom.html');
+include('common/footer.html');
+?>

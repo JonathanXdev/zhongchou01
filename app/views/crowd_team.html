@@ -1,0 +1,196 @@
+<?php
+include('common/header.html');
+?>
+<style>
+    .crowd_slide{
+        margin: 1rem 0;
+        padding: 0;
+        border-radius: 0;
+        border: none;
+    }
+    .crowd_slide .mui-card-header{
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: bold;
+        border-bottom: 0;
+        line-height: 4rem;
+    }
+    .crowd_slide .mui-card-footer>a{
+        margin: auto;
+        display: block;
+        width: 20rem;
+        text-align: center;
+        border: 1px solid;
+        line-height: 3rem;
+        font-size: 2rem;
+        color: #33d3c0;
+    }
+    .un_info{
+        background-color: #04071c;
+        background-image: radial-gradient(#fffc55, rgba(255,255,255,.2) 2px, transparent 40px), radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px), radial-gradient(#a1ccff, rgba(255,255,255,.1) 2px, transparent 40px), radial-gradient(rgba(255,255,255,.4), rgba(255,255,255,.1) 2px, transparent 30px);
+        background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px;
+        background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
+        height: 25rem;
+        position: relative;
+    }
+    .un_info .b_d_box{
+        margin: auto;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 20%;
+        text-align: center;
+        color: #fff;
+        bottom: 1rem;
+    }
+    .un_info .b_d_box span{
+        display: block;
+    }
+    .un_info .b_d_box .b_d_avtar{
+        width: 8rem;
+        height: 8rem;
+        overflow: hidden;
+        border-radius: 8rem;
+        margin: auto;
+    }
+    .un_info .b_d_box .b_d_avtar img{
+        width:100%;
+    }
+    .un_info .b_d_box .b_d_nick{
+        line-height: 3rem;
+        font-weight: bold;
+    }
+    .un_info .b_d_box .b_d_summary{
+        margin-top: 1rem;
+    }
+    .un_info .b_d_box input{
+        background:none;
+        margin: 0px 1rem;
+        width: auto;
+        border: none;
+        border-bottom: 1px solid #373737;
+        text-align: center;
+    }
+    .b_d_edit_btn{
+        position: absolute;
+        right: 1rem;
+        opacity: .9;
+        bottom: 1rem;
+    }
+</style>
+<div class="mui-content user-collect">
+    <div class="m_document">
+        <div class="mui-card crowd_slide" style="margin: 0;">
+            <div class="mui-card-content">
+                <div class="un_info" style="">
+                    <div class="b_d_box">
+                        <span class="b_d_avtar"><img src="<?=MODULE_URL.'app/views/img/team.png'?>"></span>
+                        <span class="b_d_nick">
+                            <span id="name-ct"><?=$team['name']?></span>
+                            <input id="edit-name" value="<?=$team['name']?>" type="text" style="display: none;">
+                        </span>
+                        <div class="b_d_summary">
+                            <span id="summary-ct">口号：<?=$team['summary']?></span>
+                            <input id="edit-summary" value="<?=$team['summary']?>" type="text" style="display: none;">
+                            <?php if($team['uid']==$user['uid']):?>
+                            <span class="b_d_edit_btn" data-t="edit">编辑</span>
+                            <?php endif;?>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="team-display">
+        <ul class="mui-table-view mui-team-p" style="margin-top: 0">
+
+        </ul>
+    </div>
+</div>
+<script>
+    $(function () {
+        $('.b_d_edit_btn').on('tap', function () {
+            if ($(this).data('t') == 'edit') {
+                $('#edit-summary').show();
+                $('#summary-ct').hide();
+                $('#edit-name').show();
+                $('#name-ct').hide();
+                $(this).data('t', 'ok').text('确定');
+            } else {
+                $.post("<?=appurl('crowd','editteam','team_id='.$team['id'])?>", {summary: $('#edit-summary').val(),name:$('#edit-name').val()}, function (d) {
+                    if (d.id == 1) {
+                        $('#summary-ct').text($('#edit-summary').val());
+                        $('#name-ct').text($('#edit-name').val());
+                    }else{
+                        mui.alert(d.msg);
+                    }
+                }, 'json');
+                $('#edit-summary').hide();
+                $('#edit-name').hide();
+                $('#summary-ct').show();
+                $('#name-ct').show();
+                $(this).data('t', 'edit').text('编辑');
+            }
+        })
+    });
+    require(['mui.pullrefresh'], function(mui) {
+        mui.init();
+        mui.ready(function() {
+            var page = 0;
+            var pagetotal = <?=$pagenums?>;
+            if (page < pagetotal) {
+                //循环初始化所有下拉刷新，上拉加载。
+                mui.each(document.querySelectorAll('.team-display'), function(index, pullRefreshEl) {
+                    mui(pullRefreshEl).pullToRefresh({
+                        up: {
+                            auto:true,
+                            callback: function() {
+                                var self = this;
+                                setTimeout(function() {
+                                    $('.mui-pull-bottom-tips').hide();
+                                    var ul = self.element.querySelector('.mui-team-p');
+                                    ul.appendChild(createFragment(ul, index, 5));
+                                    if (pagetotal <= page) {
+                                        $('.mui-pull-bottom-tips').hide();
+                                        self.endPullUpToRefresh(true);
+                                    } else {
+                                        self.endPullUpToRefresh(false);
+                                    }
+                                }, 1000);
+                            }
+                        }
+                    });
+                });
+
+                var createFragment = function(ul, index, count, reverse) {
+                    var length = ul.querySelectorAll('li').length;
+                    var fragment = document.createDocumentFragment();
+                    var li;
+                    var url = "<?=appurl('crowd','teamview',array('team_id' => $team['id']))?>";
+                    mui.post(url, {'page' : page}, function(data){
+                        data = $.parseJSON(data);
+                        if (data.state == 'error') {
+                            return false;
+                        }
+                        for (var i in data) {
+                            var href = "<?=appurl('crowd','uniondetail')?>";
+                            li = document.createElement('li');
+                            li.className = 'mui-table-view-cell';
+                            li.innerHTML = '<a href="' + href + '&union_id=' + data[i].id + '" ><img class="mui-media-object mui-pull-left" src="' + data[i].avatar + '"><div class="mui-media-body"><div class="mui-row"><div class="mui-col-xs-6 mui-ellipsis-2">' + data[i].nickname + '</div><div class="mui-col-xs-6 mui-text-right"><span class="mui-big mui-rmb"><span class="money">' + data[i].cjmoney + '</span></span><span class="mui-block mui-text-muted mui-small">支持人数：' + data[i].ppnum + '</span></div></div></div></a>';
+                            ul.appendChild(li, ul.firstChild);
+                        }
+                        $('.mui-pull-bottom-tips').show();
+                    });
+                    page++;
+                    return fragment;
+                };
+            }
+        });
+    });
+
+</script>
+<?php
+include('common/footer.html');
+?>

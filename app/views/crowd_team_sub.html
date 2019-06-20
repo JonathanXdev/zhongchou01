@@ -1,0 +1,160 @@
+<?php
+include('common/header.html');
+?>
+<style>
+   .code-btn{
+       position: absolute;
+       right: 0;
+       border-radius: 0;
+       width: auto!important;
+       bottom: 0;
+       top: 1px;
+       border: none;
+       border-left: 1px solid #ddd;
+   }
+</style>
+<div class="mui-content page-crowd-union-enter">
+    <div class="m_document" style="margin-bottom: 4rem;">
+        <div class="mui-slider" style="height: 20rem;">
+            <div class="mui-slider-group">
+                <?php if($crowd['coverimg']!=''):$coverimg=json_decode($crowd['coverimg'],true);foreach($coverimg as $cimg): ?>
+                <div class="mui-slider-item"><a href="#"><img src="<?=$_W['attachurl'].$cimg?>" /></a></div>
+                <?php endforeach;endif;?>
+            </div>
+            <?php
+            $time=time();
+            if($crowd['starttime']<=$time && $crowd['endtime']>=$time){
+                $stcls='ing';
+                $sttit='进行中';
+                $djstime=$crowd['endtime'];
+                $djstit='后结束';
+            }else if($crowd['starttime']>$time){
+                $stcls='nostart';
+                $sttit='未开始';
+                $djstime=$crowd['starttime'];
+                $djstit='后开始';
+            }else if($crowd['endtime']<$time){
+                $stcls='end';
+                $sttit='已结束';
+                $djstime=0;
+                $djstit='已结束';
+            }
+            ?>
+            <span class="crowd_status <?=$stcls?>"><?=$sttit?></span>
+        </div>
+        <div class="crowd_single">
+            <div class="crowd_single">
+                <div class="single-r1">
+                    <span>众筹时间：<span class="single-r1-span c_timer" data-dt="<?=$djstime?>"></span><?=$djstit?></span>
+                </div>
+                <div class="single-t">
+                    <h4><?=$crowd['title']?></h4>
+                </div>
+                <div class="single-txt clearfix">
+                    <p class="mui-h6 mui-ellipsis">
+                        <?php if($crowd['bmstatus']=='0'): ?>
+                        此联合众筹报名无需审核，报名后即可直接分享给好友筹款哦！
+                        <?php elseif($crowd['bmstatus']=='1'): ?>
+                        此联合众筹报名后需发起人审核通过后方可开始筹款，报名后请关注审核情况哦！
+                        <?php endif;?>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="crowd_detail">
+            <form id="teamform" action="<?=appurl('crowd','team','crowd_id='.$crowd['id'])?>">
+                <div class="mui-input-group">
+                    <div class="mui-input-row">
+                        <label>队伍名称</label>
+                        <input name="name"  value="" type="text" class="mui-input-clear" placeholder="请输入队伍名称" data-input-clear="12"><span class="mui-icon mui-icon-clear mui-hidden"></span>
+                    </div>
+                    <div class="mui-input-row">
+                        <label>姓名</label>
+                        <input name="realname"  value="<?=$user['name']?>" type="text" class="mui-input-clear" placeholder="请输入真实姓名" data-input-clear="12"><span class="mui-icon mui-icon-clear mui-hidden"></span>
+                    </div>
+                    <?php if($user['phone']!='' && $user['phoneak']=='1'):?>
+                    <div class="mui-input-row" style="position: relative">
+                        <label>手机号码</label>
+                        <input type="text" value="<?=$user['phone']?>" readonly name="phone">
+                    </div>
+                    <?php else:?>
+                    <div class="mui-input-row" style="position: relative">
+                        <label>手机号码</label>
+                        <input type="text" placeholder="手机号码" value="" name="phone">
+                        <span class="mui-btn getcode code-btn">获取验证码</span>
+                    </div>
+                    <div class="mui-input-row" style="position: relative">
+                        <label>验证码</label>
+                        <input type="text" placeholder="请输入手机验证码" value="" name="code">
+                    </div>
+                    <?php endif;?>
+                    <div class="mui-input-row" style="height: auto">
+                        <textarea name="summary" rows="5" placeholder="队伍口号"></textarea>
+                    </div>
+
+                    <div class="mui-button-row">
+                        <button type="button" class="mui-btn mui-btn-primary sub-team">创建队伍</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    var countdown=0;
+    var islock=false;
+    var timer1;
+    $(function(){
+        leftTimer('.c_timer');
+        $('.sub-team').on('tap',function(){
+            $.post($('#teamform').attr('action'),$('#teamform').serialize(),function(d){
+                if(d.id==1){
+                    location.reload();
+                }else{
+                    mui.alert(d.msg);
+                }
+            },'json')
+        });
+        $('.getcode').on('click',function(){
+            var that=this;
+            if(islock===true){
+                return false;
+            }else{
+                var phone=$('input[name=phone]').val();
+                var reg = /^1[0-9]{10}$/;
+                var flag = reg.test(phone);
+                if(flag==false){
+                    mui.alert('请输入有效的手机号码');
+                    return;
+                }
+                $.post('<?=appurl("user","sendsms")?>',{phone:phone},function(d){
+                    if(d.id==1){
+                        islock=true;
+                        settime(that);
+                    }else{
+                        mui.alert(d.msg);
+                    }
+                },'json');
+
+            }
+        })
+    });
+    function settime(val) {
+        if (countdown == 0) {
+            window.clearTimeout(timer1);
+            islock==false;
+            $(val).text("获取验证码");
+            countdown = 60;
+        }else {
+            $(val).text("重新发送(" + countdown + ")");
+            countdown--;
+        }
+        timer1=setTimeout(function() {
+            settime(val)
+        },1000)
+    }
+</script>
+<?php
+include('common/footer.html');
+?>

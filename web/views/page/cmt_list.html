@@ -1,0 +1,80 @@
+<div class="page-title">
+    <div class="page-breadcrumb">
+        <ol class="breadcrumb">
+            <li><a href="<?=weburl('home','index')?>">首页</a></li>
+            <li class="active">评论/留言管理</li>
+        </ol>
+    </div>
+</div>
+<div id="main-wrapper">
+    <div class="row">
+        <div class="panel panel-dark">
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <div class="dataTables_wrapper project-stats">
+                        <table id="crowdtable" class="display table" style="width: 100%;" role="grid">
+                            <thead>
+                            <tr role="row">
+                                <th rowspan="1" colspan="1" style="width: 80px;">ID</th>
+                                <th rowspan="1" colspan="1" style="width: 80px;">用户UID</th>
+                                <th rowspan="1" colspan="1" style="width: 90px;">时间</th>
+                                <th rowspan="1" colspan="1" style="width: 90px;">来源</th>
+                                <th rowspan="1" colspan="1" style="width: 90px;">状态</th>
+                                <th rowspan="1" colspan="1" style="width: 90px;">内容</th>
+                                <th rowspan="1" colspan="1" style="width: 100px;">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php if(is_array($comment)):foreach($comment as $m):?>
+                            <tr role="row" id="m_list_<?=$m['id']?>" data-info="<?=urlencode(json_encode($m))?>">
+                                <td rowspan="1" colspan="1"><?=$m['id']?></td>
+                                <td rowspan="1" colspan="1"><?=$m['uid']?></td>
+                                <td rowspan="1" colspan="1"><?=date('Y-m-d H:i:s',$m['addtime'])?></td>
+                                <td rowspan="1" colspan="1">
+                                    <?=$m['vfrom']=='crowd'?'普通众筹':($m['vfrom']=='union'?'联合众筹':'其他')?>
+                                    （<?=$m['from_id']?>）
+                                </td>
+                                <td rowspan="1" colspan="1" class="c-t-vf"><?=$m['verify']=='0'?'<span class="label label-danger">待审核</span>':($m['verify']=='-1'?'<span class="label label-warning">可能违禁</span>':'<span class="label label-success">已审核</span>')?></td>
+                                <td><?=$m['content']?></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-primary btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">操作<span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li class="v_cmt" data-d="v" data-id="<?=$m['id']?>"><a href="javascript:;">审核通过</a></li>
+                                            <li class="divider"></li>
+                                            <li class="v_cmt" data-d="del" data-id="<?=$m['id']?>"><a href="javascript:;" >删除</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach;endif?>
+                            </tbody>
+                        </table>
+                        <?=paginations($pagination,'article','cmt')?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- Main Wrapper -->
+<script>
+    var dourl='<?=weburl('comment','docmt')?>';
+    $(function(){
+        $('.v_cmt').on('click',function(){
+            var vd=$(this).data('d');
+            var id=$(this).data('id');
+            $.getJSON(dourl,{vd:vd,id:id},function(d){
+                if(d.id==1){
+                    if(vd=='del'){
+                        $('#m_list_'+id).remove();
+                    }else if(vd=='v'){
+                        $('#m_list_'+id).find('.c-t-vf').html('<span class="label label-success">已审核</span>');
+                    }
+                }else{
+                    toastr["info"](d.msg)
+                }
+            });
+        })
+    })
+</script>

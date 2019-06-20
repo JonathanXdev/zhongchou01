@@ -1,0 +1,74 @@
+<div class="page-title">
+    <div class="page-breadcrumb">
+        <ol class="breadcrumb">
+            <li><a href="<?=weburl('home','index')?>">首页</a></li>
+            <li class="active">帮助分类</li>
+        </ol>
+    </div>
+</div>
+<div id="main-wrapper">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-white">
+                <div class="panel-body">
+                    <div style="float: right; margin-bottom: 10px">
+                        <button id="add-category" class="btn btn-default" data-toggle="modal" data-target=".bs-example-modal-sm">新增分类</button>
+                    </div>
+                    <table id="help-category" class="table table-bordered table-striped" style="clear: both">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>排序</th>
+                            <th>名称</th>
+                            <th>描述</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php if(is_array($category)):foreach($category as $c):?>
+                        <tr>
+                            <td><?=$c['id']?></td>
+                            <td><a href="#" data-type="text" data-pk="<?=$c['id']?>" data-title="排序" class="category_sort editable editable-click" style="display: inline;"><?=$c['sort']?></a></td>
+                            <td><a href="#" data-type="text" data-pk="<?=$c['id']?>" data-title="输入名称" class="category_name editable editable-click" style="display: inline;"><?=$c['name']?></a></td>
+                            <td><a href="#" data-type="textarea" data-pk="<?=$c['id']?>" data-title="输入分类描述" class="editable editable-click category_ndesc" style="display: inline;"><?=$c['ndesc']?></a></td>
+                            <td><button data-pk="<?=$c['id']?>" class="btn btn-danger btn-rounded category-del">删除</button></td>
+                        </tr>
+                        <?php endforeach;endif;?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- Main Wrapper -->
+<div class="modal fade bs-example-modal-sm in" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="mySmallModalLabel">新增分类</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" name="category-form" id="category-form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="name" id="name" placeholder="分类名称">
+                    </div>
+                    <div class="form-group">
+                        <input type="number" class="form-control" name="sort" id="sort" placeholder="分类排序">
+                    </div>
+                    <div class="form-group">
+                        <textarea name="ndesc" placeholder="分类描述" class="form-control"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success" id="category-sub">增加</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var editurl='<?=weburl('help','editcategory')?>';
+    var delurl='<?=weburl('help','delcategory')?>';
+</script>

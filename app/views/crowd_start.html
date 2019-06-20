@@ -1,0 +1,523 @@
+<?php
+include('common/header.html');
+?>
+<style>
+    .Eleditor-delete-layer{
+        z-index: 9999;
+    }
+    .Eleditor-insertImage .webuploader-pick{
+        padding: 0;
+        color: #040404;
+        position: unset!important;
+        line-height: unset!important;
+        text-align:left;
+        font-size: 14px;
+    }
+    .Eleditor-textEditor{
+        z-index: 999;
+    }
+    .crowd-content-box{
+        overflow: hidden;
+        background: #fff;
+        margin: 10px 10px 4rem;
+        border-radius: 3px;
+        min-height: 200px;
+        padding: 5px;
+    }
+    .crowd-content-box img{
+        max-width: 100%;
+    }
+</style>
+<div class="mui-content page-crowd-detail">
+    <div class="m_document" style="margin:8rem 0;">
+        <?php if($step=='1'):
+            if(!empty($crowd)){
+                $default_info=json_decode($crowd['default_info'],true);
+            }
+        ?>
+        <!--发起众筹步骤1-->
+        <div class="start_step step_1" id="step1">
+            <div class="mui-bar mui-bar-nav">
+                <h1 class="mui-title">基本信息</h1>
+                <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+            </div>
+            <form id="step-form-1" action="<?=appurl('mycrowd','sub','step='.$step.(@$crowd['id']>0?'&id='.$crowd['id']:''))?>">
+                <div class="mui-card ipt_box">
+                    <div class="mui-card-header">基础选项</div>
+                    <div class="mui-card-content">
+                        <div class="mui-card-content-inner">
+                            <div class="mui-input-group">
+                                <div class="mui-input-row">
+                                    <label>众筹类目</label>
+                                    <input type="hidden" value="<?=@$default_info['cid']?>" name="cid">
+                                    <div class="my-navigate-right" id="showCrowdCate"><?=@$ckv[$default_info['cid']]==''?'请选择':$ckv[$default_info['cid']]?></div>
+                                </div>
+                                <div class="mui-input-row">
+                                    <label>众筹类型</label>
+                                    <input type="hidden" value="<?=@$default_info['ntype']?>" name="ntype">
+                                    <div class="my-navigate-right" id="showCrowdtype"><?=@$default_info['ntype']=='0'?'普通':(@$default_info['ntype']=='1'?'联合':'请选择')?></div>
+                                </div>
+                                <div class="mui-input-row">
+                                    <label>发起人身份</label>
+                                    <input type="hidden" value="<?=@$default_info['nfrom']?>" name="nfrom">
+                                    <div class="my-navigate-right" id="showCrowdfrom"><?=@$default_info['nfrom']==''?'请选择':(@$default_info['nfrom']=='2'?'企业/机构':'个人')?></div>
+                                </div>
+                                <div class="mui-input-row">
+                                    <label>区域</label>
+                                    <input type="hidden" value="<?=@$default_info['city']?>" name="city">
+                                    <?php
+                                    $areatxt='请选择';
+                                    if(@$default_info['city']==''){
+
+                                    }else{
+                                       $area=get_area($default_info['city']);
+                                       $areatxt=$area['a1name'].$area['a2name'].$area['a3name'];
+                                    }
+                                    ?>
+                                    <div class="my-navigate-right" id="showCrowdcity"><?=$areatxt?></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mui-card ipt_box">
+                    <div class="mui-card-header">增加资质</div>
+                    <div class="mui-card-content">
+                        <div class="mui-card-content-inner">
+                            <p>个人必须上传身份证正反面，企业请上传营业执照</p>
+                            <p>资质越多，越容易审核通过。</p>
+                        </div>
+                        <div class="mui-card-content-inner mui-input-group auth_list">
+
+                        </div>
+                    </div>
+                    <div class="mui-card-footer add-auth" style="text-align: center;padding-bottom: 0;">
+                        <span class="mui-icon mui-icon-plusempty" style="font-size: 18px;">新增</span></div>
+                </div>
+            </form>
+            <div class="mui-row btm_menu">
+                <div class="mui-col-sm-12 mui-col-xs-12 sub-order" data-step="<?=$step?>">下一步</div>
+            </div>
+            <script>
+                var catarr=<?=$category?>;
+                var tyarr=[{value:0,text:'普通众筹'},{value:1,text:'联合众筹'}];
+                var fmarr=[{value:1,text:'个人'},{value:2,text:'企业机构'}];
+                $(function () {
+                    <?php
+                        $autharr=@json_decode($default_info['auth'],true);
+                    if(!empty($autharr)){
+
+                        foreach($autharr as $a){
+                            echo 'addauth(\''.$a['name'].'\',\''.$a['img'].'\');';
+                        }
+                    }
+                        ?>
+                })
+            </script>
+            <script type="text/javascript" src="<?=appurl('mycrowd','citydata')?>"></script>
+            <script>
+                var authnum=0;
+                $(function() {
+                    mui.init();
+                    var catePicker = new mui.PopPicker();
+                    var typePicker = new mui.PopPicker();
+                    var fromPicker = new mui.PopPicker();
+                    var cityPicker = new mui.PopPicker({
+                        layer: 3
+                    });
+                    cityPicker.setData(cityData3);
+                    catePicker.setData(catarr);
+                    typePicker.setData(tyarr);
+                    fromPicker.setData(fmarr);
+                    $('#showCrowdCate').on('tap', function(event) {
+                        var that=$(this);
+                        catePicker.show(function(items) {
+                            that.html(items[0]['text']);
+                            $('input[name=cid]').val(items[0]['value']);
+                        });
+                    });
+                    $('#showCrowdtype').on('click', function(event) {
+                        var that=$(this);
+                        typePicker.show(function(items) {
+                            that.html(items[0]['text']);
+                            $('input[name=ntype]').val(items[0]['value']);
+                        });
+                    });
+                    $('#showCrowdfrom').on('click', function(event) {
+                        var that=$(this);
+                        fromPicker.show(function(items) {
+                            that.html(items[0]['text']);
+                            $('input[name=nfrom]').val(items[0]['value']);
+                        });
+                    });
+                    $('#showCrowdcity').on('click', function(event) {
+                        var that=$(this);
+                        cityPicker.show(function(items) {
+                            that.html((items[0].text || '')+(items[1].text||'')+(items[2].text||''));
+                            $('input[name=city]').val((items[2].value || (items[1].value || (items[0].value))))
+                        });
+                    });
+                    $('.add-auth').on('click',function () {
+                        addauth();
+                    });
+                });
+                function addauth(authname,authimg){
+                    if(!authname){
+                        authname='';
+                    }
+                    if(!authimg){
+                        authimg='';
+                    }
+                    var html='<div class="auth_box auth_box_'+authnum+'">'+
+                        '<span class="mui-icon mui-icon-closeempty remove-authbox"></span>'+
+                        '<div class="mui-input-row">'+
+                        '<label>证明名称</label>'+
+                        '<input type="text" name="authname[]" placeholder="证明名称" value="'+authname+'">'+
+                        '</div>'+
+                        '<div class="mui-input-row " style="height: auto;">'+
+                        '<label>证明图片</label>'+
+                        '<input type="hidden" class="auth_'+authnum+'" value="'+authimg+'" name="authimg[]">'+
+                        '<div class="authupload">'+
+                        '<div class="webuploader-pick"></div>'+
+                        '<div class="upload-btn" data-id="'+authnum+'"></div>'+
+                        '</div>'+
+                        '</div></div>';
+                    $('.auth_list').append(html);
+                    $('.remove-authbox').unbind('click').on('click',function(){
+                        $(this).parent().remove();
+                    })
+                    var tnum=authnum;
+                    util.image($('.auth_box_'+tnum+' .upload-btn'), function(res){
+                        $('.auth_box_'+tnum+' .webuploader-pick').html('<image width="100%" src="'+res.url+'">');
+                        $('.auth_'+tnum).val(res.attachment);
+                    });
+                    if(authimg!=''){
+                        $('.auth_box_'+tnum+' .webuploader-pick').html('<image width="100%" src="'+window.sysinfo.attachurl+authimg+'">');
+                    }
+                    authnum++;
+                }
+            </script>
+        </div>
+        <?php endif;?>
+        <?php if($step=='2' && !empty($crowd)):
+            $crowd_info=json_decode($crowd['crowd_info'],true);
+        ?>
+        <!--发起众筹步骤2-->
+        <div class="start_step step_2" id="step2">
+            <div class="mui-bar mui-bar-nav">
+                <h1 class="mui-title">项目信息</h1>
+                <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+            </div>
+            <form id="step-form-2" action="<?=appurl('mycrowd','sub','step='.$step.(@$crowd['id']>0?'&id='.$crowd['id']:''))?>">
+                <div class="mui-card ipt_box">
+                    <div class="mui-card-header">期望时间</div>
+                    <div class="mui-card-content">
+                        <div class="mui-card-content-inner">
+                            <div class="mui-input-group">
+                                <div class="mui-input-row">
+                                    <label>开始时间</label>
+                                    <input type="hidden" value="<?=@$crowd_info['starttime']==''?date('Y-m-d H:i:s'):@date('Y-m-d H:i:s',$crowd_info['starttime'])?>" name="starttime">
+                                    <div class="my-navigate-right showtime" data-id="starttime"><?=@$crowd_info['starttime']==''?date('Y-m-d H:i'):@date('Y-m-d H:i',$crowd_info['starttime'])?></div>
+                                </div>
+                                <div class="mui-input-row">
+                                    <label>结束时间</label>
+                                    <input type="hidden" value="<?=@$crowd_info['endtime']==''?date('Y-m-d H:i:s'):@date('Y-m-d H:i:s',$crowd_info['endtime'])?>" name="endtime">
+                                    <div class="my-navigate-right showtime" data-id="endtime"><?=@$crowd_info['endtime']==''?date('Y-m-d H:i'):@date('Y-m-d H:i',$crowd_info['endtime'])?></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mui-card ipt_box">
+                    <div class="mui-card-header">基础信息</div>
+                    <div class="mui-card-content">
+                        <div class="mui-card-content-inner">
+                            <div class="mui-input-group">
+                                <div class="mui-input-row">
+                                    <label>封面图片</label>
+                                </div>
+                                <ul class="mui-table-view mui-grid-view face-list">
+                                    <li class="mui-table-view-cell mui-media mui-col-xs-4">
+                                        <div class="border-box">
+                                            <span class="addface mui-icon mui-icon-plusempty upload-icon "></span>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <div class="mui-input-row">
+                                    <label>标题</label>
+                                    <input type="text" class="mui-input-clear" placeholder="众筹标题" data-input-clear="5" value="<?=@$crowd_info['title']?>" name="title">
+                                </div>
+                                <div class="mui-input-row">
+                                    <label>筹集金额</label>
+                                    <input type="number" class="mui-input-clear" placeholder="筹集金额" data-input-clear="5" value="<?=@$crowd_info['money']?>" name="money">
+                                </div>
+                                <div class="mui-input-row">
+                                    <label>筹款目的</label>
+                                </div>
+                                <div class="">
+                                    <textarea name="summary" rows="5" placeholder="请描述您筹款的目的"><?=@$crowd_info['summary']?></textarea>
+                                </div>
+                                <div class="mui-input-row">
+                                    <label>标签</label>
+                                </div>
+                                <?php
+                                    $tagsarr=@json_decode($crowd_info['tags'],true);
+                                ?>
+                                <div class="mui-input-row">
+                                    <input type="text" class="mui-input-clear" placeholder="标签1" data-input-clear="5" name="tags[]" value="<?=@$tagsarr[0]?>">
+                                </div>
+                                <div class="mui-input-row">
+                                    <input type="text" class="mui-input-clear" placeholder="标签2" data-input-clear="5" name="tags[]" value="<?=@$tagsarr[1]?>">
+                                </div>
+                                <div class="mui-input-row">
+                                    <input type="text" class="mui-input-clear" placeholder="标签3" data-input-clear="5" name="tags[]" value="<?=@$tagsarr[2]?>">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="mui-row btm_menu">
+            <div class="mui-col-sm-12 mui-col-xs-12 sub-order" data-step="<?=$step?>">下一步</div>
+        </div>
+        <script>
+            $(function(){
+                <?php
+                    $facearr=@json_decode($crowd_info['coverimg'],true);
+                if(!empty($facearr)){
+                    foreach($facearr as $a){
+                        echo 'addfaceimg({attachment:\''.$a.'\',url:window.sysinfo.attachurl+\''.$a.'\'});';
+                    }
+                }
+                    ?>
+            })
+        </script>
+        <script>
+            $(function(){
+                var dtPicker = new mui.DtPicker();
+                $('.showtime').on('tap', function(event) {
+                    var that=$(this);
+                    dtPicker.show(function (items) {
+                        that.html(items.text);
+                        $('input[name='+that.data('id')+']').val(items.value);
+                    })
+                });
+                util.image($('.addface'), function(res){
+                    addfaceimg(res);
+                });
+            })
+            function addfaceimg(res){
+                var uhtml='<li class="mui-table-view-cell mui-media mui-col-xs-4 face-box">'+
+                    '<div class="border-box">'+
+                    '<input type="hidden" name="coverimg[]" value="'+res.attachment+'">'+
+                    '<img class="mui-media-object" src="'+res.url+'">'+
+                    '<div class="mui-media-body u-move removeimgbtn"><span class="mui-icon mui-icon-trash"></span></div>'+
+                    '</div>'+
+                    '</li>';
+                $('.face-list').prepend(uhtml);
+                $('.removeimgbtn').unbind('click').on('click',function(){
+                    $(this).parent().parent().remove();
+                })
+            }
+        </script>
+        <?php endif;?>
+        <?php if($step=='3' && !empty($crowd) && $crowd['ntype']==0):
+            $crowd_reward=$crowd['crowd_reward']==''?'':json_decode($crowd['crowd_reward'],true);
+        ?>
+        <!--发起众筹步骤4-->
+        <div class="start_step step_3" id="step3">
+            <div class="mui-bar mui-bar-nav">
+                <h1 class="mui-title">回报设置</h1>
+                <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+            </div>
+            <form id="step-form-3" action="<?=appurl('mycrowd','sub','step='.$step.(@$crowd['id']>0?'&id='.$crowd['id']:''))?>">
+                <div class="reward-list">
+
+                </div>
+                <div class="add-reward m-row-c"><span class="mui-btn" style="    background: #33d3c0;
+    color: #fff;
+    width: 28rem;">增加回报项</span></div>
+            </form>
+        </div>
+        <div class="mui-row btm_menu">
+            <div class="mui-col-sm-12 mui-col-xs-12 sub-order" data-step="<?=$step?>">下一步</div>
+        </div>
+        <script>
+            $(function(){
+                <?php
+                if($crowd_reward!=''):
+                foreach($crowd_reward as $d):
+                $d['reward_fd']=unserialize($d['reward_fd']);
+                    ?>
+                addreward(<?=json_encode($d)?>);
+                <?php endforeach;else: ?>
+                addreward();
+                <?php endif; ?>
+            })
+        </script>
+        <script>
+            var rewardnum=0;
+            $(function() {
+                $('.add-reward').on('click',function(){
+                    addreward();
+                })
+            })
+            function addreward(crowd_reward){
+                if(!crowd_reward){
+                    crowd_reward={};
+                }
+                var tnum=rewardnum;
+                var rhtml='<div class="mui-card ipt_box reward_'+tnum+'">'+
+                    '<div class="mui-card-header">回报项<span class="mui-icon mui-icon-closeempty remove_box remove-authbox"></span></div>'+
+                    '<div class="mui-card-content">'+
+                    '<div class="mui-card-content-inner">'+
+                    '<div class="mui-input-group">'+
+                    '<div class="mui-input-row">'+
+                    '<label>回报类型</label>'+
+                    '<span></span>'+
+                    '<select name="reward_type['+tnum+']">'+
+                    '<option '+(crowd_reward.reward_type?(crowd_reward.reward_type=='0'?'selected':''):'')+' value="0">实物回报</option>'+
+                    '<option '+(crowd_reward.reward_type?(crowd_reward.reward_type=='1'?'selected':''):'')+' value="1">虚拟回报</option>'+
+                    '</select>'+
+                    '   </div>'+
+                    '   <div class="mui-input-row">'+
+                    '   <label>支持金额</label>'+
+                    '   <input type="number" class="mui-input-clear" placeholder="用户支持金额" data-input-clear="5" value="'+(crowd_reward.reward_money?crowd_reward.reward_money:'')+'" name="reward_money['+tnum+']">'+
+                    '   </div>'+
+                    '   <div class="mui-input-row">'+
+                    '   <label>回报项标题</label>'+
+                    '   <input type="text" class="mui-input-clear" placeholder="回报标题" data-input-clear="5" value="'+(crowd_reward.reward_title?crowd_reward.reward_title:'')+'" name="reward_title['+tnum+']">'+
+                    '   </div>'+
+                    '   <div class="mui-input-row">'+
+                    '   <label>回报内容</label>'+
+                    '   </div>'+
+                    '   <div class="">'+
+                    '   <textarea name="reward_content['+tnum+']" rows="5" placeholder="此回报项的描述">'+(crowd_reward.reward_content?crowd_reward.reward_content:'')+'</textarea>'+
+                    '</div>'+
+                    '<div class="mui-input-row">'+
+                    '    <label>回报数量</label>'+
+                    '   <input type="number" class="mui-input-clear" placeholder="数量" data-input-clear="5" value="'+(crowd_reward.reward_limit?crowd_reward.reward_limit:'')+'" name="reward_limit['+tnum+']">'+
+                    '   </div>'+
+                    '   <div class="mui-input-row">'+
+                    '   <label>支持数/人</label>'+
+                    '   <input type="number" class="mui-input-clear" placeholder="每人允许最大支持数量" data-input-clear="5" value="'+(crowd_reward.reward_marknum?crowd_reward.reward_marknum:'')+'" name="reward_marknum['+tnum+']">'+
+                    '   </div>'+
+                    '   <div class="mui-input-row">'+
+                    '   <label>回报天数</label>'+
+                    '   <input type="number" class="mui-input-clear" placeholder="X天以后获得回报" data-input-clear="5" value="'+(crowd_reward.reward_day?crowd_reward.reward_day:'')+'" name="reward_day['+tnum+']">'+
+                    '   </div>'+
+                    '   <div class="mui-input-row">'+
+                    '       <label>自定义字段</label>'+
+                    '   </div>';
+                reward_fd=crowd_reward.reward_fd?crowd_reward.reward_fd:false;
+                if(reward_fd){
+                    for(var o in reward_fd){
+                        rhtml+='<div class="mui-input-row"><span class="mui-icon mui-icon-closeempty remove-authbox rm-fd"></span>';
+                        rhtml+='<input type="text" class="mui-input-clear" placeholder="自定义字段" data-input-clear="5" name="reward_fd['+tnum+'][]" value="'+reward_fd[o]+'">';
+                        rhtml+='</div>';
+                    }
+                }else{
+                    rhtml+='<div class="mui-input-row"><span class="mui-icon mui-icon-closeempty remove-authbox rm-fd"></span>';
+                    rhtml+='<input type="text" class="mui-input-clear" placeholder="自定义字段" data-input-clear="5" name="reward_fd['+tnum+'][]" value="">';
+                    rhtml+='</div>';
+                }
+                rhtml+='<div class="add-fd m-row-c" data-id="'+tnum+'"><span class="mui-btn ">增加字段</span></div>';
+                rhtml+='</div>'+
+                    '   </div>'+
+                    '   </div>'+
+                    '   </div>';
+                $('.reward-list').append(rhtml);
+                $('.remove_box').unbind('click').on('click',function(){
+                    $(this).parents('.ipt_box').remove();
+                });
+                $('.add-fd').unbind('click').on('click',function(){
+
+                    fdhtml='<div class="mui-input-row"><span class="mui-icon mui-icon-closeempty remove-authbox rm-fd"></span>';
+                    fdhtml+='<input type="text" class="mui-input-clear" placeholder="自定义字段" data-input-clear="5" name="reward_fd['+$(this).data('id')+'][]" value="">';
+                    fdhtml+='</div>';
+                    $(this).before(fdhtml);
+                    $('.rm-fd').unbind('click').on('click',function(){
+                        $(this).parents('.mui-input-row').remove();
+                    })
+                });
+                $('.rm-fd').unbind('click').on('click',function(){
+                    $(this).parents('.mui-input-row').remove();
+                })
+                rewardnum++;
+            }
+        </script>
+        <?php endif;?>
+        <?php if($step=='4' && !empty($crowd)):
+        ?>
+        <!--发起众筹步骤3-->
+        <div class="start_step step_4" id="step4">
+            <div class="mui-bar mui-bar-nav">
+                <h1 class="mui-title">详细描述</h1>
+                <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+            </div>
+            <form id="step-form-4" action="<?=appurl('mycrowd','sub','step='.$step.(@$crowd['id']>0?'&id='.$crowd['id']:''))?>">
+                <textarea name="crowd_content" style="display: none"><?=@$crowd['crowd_content']?></textarea>
+                <div class="crowd-content-box">
+
+                </div>
+            </form>
+        </div>
+        <div class="mui-row btm_menu">
+            <div class="mui-col-sm-12 mui-col-xs-12 sub-order" data-step="<?=$step?>">提交审核</div>
+        </div>
+        <script>
+            var crowdEditor;
+            $(function(){
+                require(['webuploader'],function(autil){
+                    WebUploader=autil.Webuploader;
+                    crowdEditor = new Eleditor({
+                        mup:WebUploader,
+                        el: '.crowd-content-box',
+                        upload:{
+                            server: window.sysinfo.siteroot+'app/index.php?i='+window.sysinfo.uniacid+'&j=&c=utility&a=file&do=upload&type=image&thumb=0',
+                            fileSizeLimit: 2,
+                            formName: 'file',//设置文件name,
+                            accept: {//accept一般不用设置
+                                title: 'Images',
+                                extensions: 'gif,jpg,jpeg,bmp,png,webp',
+                                mimeTypes: 'image/gif,image/jpg,image/jpeg,image/bmp,image/png,image/webp'
+                            }
+                        },
+                        changer: function(){
+                            $('textarea[name=crowd_content]').val(crowdEditor.getContent());
+                            console.log($('textarea[name=crowd_content]').val());
+                        }
+                    });
+                    crowdEditor.append($('textarea[name=crowd_content]').val());
+                });
+            });
+        </script>
+
+        <?php endif;?>
+    </div>
+</div>
+<script>
+    var starturl='<?=appurl('mycrowd','start')?>';
+    var indexurl='<?=appurl('mycrowd','index')?>';
+    $(function(){
+        $('.sub-order').on('click',function(){
+            var step=$(this).data('step');
+            var tform=$('#step-form-'+step);
+            $.post(tform.attr('action'),tform.serialize(),function(d){
+                if(d.id==1){
+                    if(d.data.step>0){
+                        location.href=starturl+'&id='+d.data.id+'&step='+d.data.step;
+                    }else{
+                        location.href=indexurl;
+                    }
+                }else{
+                    mui.alert(d.msg);
+                }
+            },'json');
+        })
+    })
+</script>
+<?php
+include('common/footer.html');
+?>

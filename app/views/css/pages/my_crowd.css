@@ -1,0 +1,86 @@
+.ipt_box{
+    padding: 1rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+.my-navigate-right{
+    height: 40px;
+    line-height: 41px;
+}
+.my-navigate-right:after{
+    right: 15px;
+    content: '\e583';
+    position: absolute;
+    top: 50%;
+    display: inline-block;
+    font-family: Muiicons;
+    font-size: inherit;
+    line-height: 1;
+    color: #bbb;
+    text-decoration: none;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+    -webkit-font-smoothing: antialiased;
+}
+.authupload{
+    width: 10rem;
+    height: 10rem;
+    float: left;
+    position: relative;
+    text-align: center;
+    border: 1px dashed #ddd;
+    margin: 1rem;
+    overflow: hidden;
+}
+.webuploader-pick{
+    position: absolute!important;
+    line-height: 10rem;
+    width: 100%;
+    left: 0;
+    height: 10rem;
+}
+.upload-btn{
+    height: 10rem;
+    width: 10rem;
+    float: left;
+    top: 0;
+    right: 0;
+    position: absolute;
+}
+.auth_box{
+    position: relative;
+    border: 1px solid #33d3c0;
+    margin-bottom:.3rem;
+}
+.remove-authbox{
+    position: absolute;
+    right: 0;
+    background: #33d3c0;
+    color: #fff;
+    top: -1px;
+    z-index: 1;
+}
+.upload-icon{
+    width: 100%;
+    text-align: center;
+    height: 9rem;
+    line-height: 9rem;
+    font-weight: bold;
+    color: #555;
+}
+.border-box{
+    border: 1px dashed #ddd;
+    max-height: 10rem;
+    overflow: hidden;
+}
+.u-move{
+    height: auto!important;
+    background: #33d3c0;
+    color: #fff!important;
+    position: absolute;
+    bottom: 0;
+}
+.m-row-c{
+    padding: 1rem;
+    text-align: center;
+}

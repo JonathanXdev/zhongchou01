@@ -77,6 +77,36 @@ class Crowd extends CI_Controller
 			$this->load->view("crowd_union.html", $data);
 		}
 	}
+
+    /**
+     * @notes: 提供zc详情信息
+     * @author tongwz
+     * @date: 2019年6月26日14:52:03
+     */
+	public function detailInfo()
+    {
+        global $_W;
+        $post = $this->input->post();
+        $id = isset($post['id']) ? $post['id'] : '';
+        // 总展位数
+        $crowdCount = isset($post['crowdCount']) ? $post['crowdCount'] : '';
+        if (empty($id) || empty($crowdCount)) {
+            echo json_encode(['code' => 0, 'msg' => '参数错误']);die;
+        }
+        // 获取zc详情 报名人数bmnum 目标金额money
+        $crowd = $this->crowd_model->getcrowd_row($id);
+        if (isset($crowd["ntype"]) && $crowd["ntype"] == 0) {
+            echo json_encode(['code' => 0, 'msg' => '个人众筹暂时无数据']);die;
+        }
+        $data['crowd'] = $crowd;
+        // 联合zc成功人数
+        $overnum = pdo_fetch("SELECT count(id) as count FROM " . tablename("yhzc_crowd_union") . " where crowd_id={$crowd["id"]} and cjmoney>={$crowd["money"]}");
+        $data["overnum"] = isset($overnum['count']) ? intval($overnum['count']) : 0;
+        // 剩余展位数量
+        $data['surplusNum'] = $crowdCount - $data["overnum"];
+
+        echo json_encode(['code' => 1, 'msg' => '成功', 'data' => $data]);
+    }
 	public function getreports()
 	{
 		$crowd_id = $this->input->get("crowd_id");

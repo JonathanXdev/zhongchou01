@@ -72,6 +72,74 @@ class Crowd_model extends CI_Model {
         global $_W;
         return pdo_fetch("SELECT * FROM ".tablename('yhzc_crowd_union')." WHERE id = :id and uniacid=:uniacid LIMIT 1", array(':id' => $id,':uniacid'=>$_W['uniacid']));
     }
+
+    /**
+     * @notes: 查找众筹报名人数
+     * @author tongwz
+     * @date: 2019年6月29日10:53:10
+     * @param int $page
+     * @param int $limit
+     * @param int $id
+     * @return bool
+     */
+    public function getCrowdUnionList($page = 1, $limit = 10, $id = 0)
+    {
+        global $_W;
+        if ($id == 0) return false;
+        $where = " u.uniacid=:uniacid and u.crowd_id=:crowd_id and u.status=1";
+        $wheres[':uniacid']=$_W['uniacid'];
+        $wheres[':crowd_id'] = $id;
+        $sql = "SELECT
+                    u.*, u.id AS unionid,
+                    from_unixtime(u.addtime, '%Y-%m-%d') AS uaddtime,
+                    c.title,
+                    c.money,
+                    cc. NAME AS cname
+                FROM
+                    ims_yhzc_crowd_union AS u
+                LEFT JOIN ims_yhzc_crowd c ON u.crowd_id = c.id
+                LEFT JOIN ims_yhzc_crowd_category cc ON c.cid = cc.id
+                WHERE
+                    ". $where."
+                GROUP BY
+                    u.id
+                ORDER BY
+                    u.updatetime DESC
+                LIMIT ".($page-1)* $limit.",
+                 ". $limit;
+        $res = pdo_fetchall($sql, $wheres);
+        return $res;
+    }
+
+    // 获取光荣榜列表
+    public function getCrowdHonourUnionList($page = 1, $limit = 10, $id = 0)
+    {
+        global $_W;
+        if ($id == 0) return false;
+        $where = " u.uniacid=:uniacid and u.crowd_id=:crowd_id and u.status=1 and u.cjmoney >= c.money";
+        $wheres[':uniacid']=$_W['uniacid'];
+        $wheres[':crowd_id'] = $id;
+        $sql = "SELECT
+                    u.*, u.id AS unionid,
+                    from_unixtime(u.addtime, '%Y-%m-%d') AS uaddtime,
+                    c.title,
+                    c.money,
+                    cc. NAME AS cname
+                FROM
+                    ims_yhzc_crowd_union AS u
+                LEFT JOIN ims_yhzc_crowd c ON u.crowd_id = c.id
+                LEFT JOIN ims_yhzc_crowd_category cc ON c.cid = cc.id
+                WHERE
+                    ". $where."
+                GROUP BY
+                    u.id
+                ORDER BY
+                    u.cjmoney DESC
+                LIMIT ".($page-1)* $limit.",
+                 ". $limit;
+        $res = pdo_fetchall($sql, $wheres);
+        return $res;
+    }
     public function getcrowd_union_all($page=0,$limit=10,$key=false){
         global $_W;
         $crowd_id=$this->input->get('crowd_id');
@@ -423,6 +491,14 @@ class Crowd_model extends CI_Model {
             return false;
         }
     }
+
+    /**
+     * @notes: 添加众筹信息
+     * @author tongwz
+     * @date: 2019年6月29日15:11:44
+     * @param $crowd
+     * @return mixed
+     */
     public function add_union($crowd){
         global $_W;
         $time=time();
@@ -431,6 +507,23 @@ class Crowd_model extends CI_Model {
         $summary=$this->input->post('summary');
         $team_id=$this->input->post('team_id');
         $theme=$this->input->post('theme');
+        $production = $this->input->post('production');
+        if (!empty($production)){
+            foreach ($production as $key => $val) {
+                if ($val['img'] == false) {
+                    unset($production[$key]);
+                }
+            }
+        } else {
+            die(json_encode(array('id'=>-1,'msg'=>'请上传您的作品')));
+        }
+        $experience = $this->input->post('experience');
+        if (!empty($experience)) {
+            $experience = array_filter($experience);
+            if (empty($experience)) die(json_encode(array('id'=>-1,'msg'=>'请写入您的经历')));
+        } else {
+            die(json_encode(array('id'=>-1,'msg'=>'请写入您的经历')));
+        }
         if($realname==''){
             die(json_encode(array('id'=>-1,'msg'=>'请留下您的真实姓名')));
         }
@@ -442,6 +535,9 @@ class Crowd_model extends CI_Model {
         }
         if(mb_strlen($summary,'UTF8')>20){
             die(json_encode(array('id'=>-1,'msg'=>'口号长度最大为20个字符')));
+        }
+        if (empty($production)) {
+            die(json_encode(array('id'=>-1,'msg'=>'请上传您的作品')));
         }
         pdo_begin();
         try{
@@ -457,7 +553,10 @@ class Crowd_model extends CI_Model {
                 'ppnum' =>0,
                 'sharenum' =>0,
                 'cjmoney' =>0,
-                'addtime' =>$time,
+                'addtime' => $time,
+                'updatetime' => $time, // 增加更新时间
+                'experience' => json_encode($experience,JSON_UNESCAPED_UNICODE), // 经历
+                'production' => json_encode($production,JSON_UNESCAPED_UNICODE), // 作品
                 'starttime' =>0,
                 'status'=>0,
                 'theme'=>$theme,

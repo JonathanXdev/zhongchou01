@@ -369,7 +369,7 @@ require_once BASEPATH.'core/CodeIgniter.php';
                         }
                     }
                     if($reportrow['union_id']>0){
-                        $uniondata=array('ppnum +='=>1,'cjmoney +='=>$params['fee']);
+                        $uniondata=array('ppnum +='=>1,'cjmoney +='=>$params['fee'], 'updatetime' => time(), 'viewnum +=' =>1);
                         $upunion=pdo_update('yhzc_crowd_union',$uniondata, array('id' => $reportrow['union_id']));
                         $union=pdo_fetch("SELECT u.*,m.openid as openid,c.title as title,c.starttime as cstarttime,c.endtime as cendtime FROM ".tablename('yhzc_crowd_union')." as u LEFT JOIN ".tablename('mc_mapping_fans')." as m ON m.uid=u.user_id LEFT JOIN ".tablename('yhzc_crowd')." as c ON c.id=u.crowd_id WHERE u.id = :id and u.uniacid=:uniacid LIMIT 1", array(':id' => $reportrow['union_id'],':uniacid'=>$params['uniacid']));
                         if($union['cjmoney']>$crowdrow['money']){

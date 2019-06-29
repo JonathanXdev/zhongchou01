@@ -107,6 +107,84 @@ class Crowd extends CI_Controller
 
         echo json_encode(['code' => 1, 'msg' => '成功', 'data' => $data]);
     }
+
+    /**
+     * @notes: 获取众筹榜报名选手列表
+     * @author tongwz
+     * @date: 2019年6月29日10:52:51
+     */
+    public function getCrowdUsers()
+    {
+        $page = $this->input->get('page');
+        $limit = $this->input->get('limit');
+        $id = $this->input->get('crowd_id');
+        if ($page == '') {
+            $page = 1;
+        }
+        if ($limit == '') {
+            $limit = 10;
+        }
+        $unionArr = $this->crowd_model->getCrowdUnionList($page, $limit, $id);
+        if (empty($unionArr)) {
+            $arr["code"] = 0;
+            $arr["msg"] = "还没有人报名！";
+        } else {
+            foreach ($unionArr as $key => $val) {
+                $tmpMoney = round(($val['cjmoney'] / $val['money']) * 100, 6);
+                if ($tmpMoney > intval($tmpMoney)) {
+                    $tmpMoney = ceil($tmpMoney);
+                }
+                $unionArr[$key]['chart'] = $tmpMoney;
+            }
+            $counts = $this->crowd_model->getcrowd_union_count(false);
+            $count = $counts["count"];
+            $arr["code"] = 1;
+            $arr["msg"] = "success";
+            $arr["data"] = $unionArr;
+            $arr["page"] = [ceil($count / $limit), intval($count)];
+        }
+        die(json_encode($arr));
+    }
+
+    // 光荣榜信息
+    public function getCrowdHonourUsers()
+    {
+        $page = $this->input->get('page');
+        $limit = $this->input->get('limit');
+        $id = $this->input->get('crowd_id');
+        if ($page == '') {
+            $page = 1;
+        }
+        if ($limit == '') {
+            $limit = 10;
+        }
+        $unionArr = $this->crowd_model->getCrowdHonourUnionList($page, $limit, $id);
+        if (empty($unionArr)) {
+            $arr["code"] = 0;
+            $arr["msg"] = "光荣榜上暂无人入选！";
+        } else {
+            foreach ($unionArr as $key => $val) {
+                $tmpMoney = round(($val['cjmoney'] / $val['money']) * 100, 6);
+                if ($tmpMoney > intval($tmpMoney)) {
+                    $tmpMoney = ceil($tmpMoney);
+                }
+                $unionArr[$key]['chart'] = $tmpMoney;
+                // 完成时间
+                if (!empty($val['endtime'])) {
+                    $unionArr[$key]['endDate'] = date('Y-m-d H:i:s', $val['endtime']);
+                } else {
+                    $unionArr[$key]['endDate'] = '0';
+                }
+            }
+            $counts = $this->crowd_model->getcrowd_union_count(false);
+            $count = $counts["count"];
+            $arr["code"] = 1;
+            $arr["msg"] = "success";
+            $arr["data"] = $unionArr;
+            $arr["page"] = [ceil($count / $limit), intval($count)];
+        }
+        die(json_encode($arr));
+    }
 	public function getreports()
 	{
 		$crowd_id = $this->input->get("crowd_id");
@@ -292,6 +370,12 @@ class Crowd extends CI_Controller
 		}
 		$this->load->view("crowd_pay.html", $data);
 	}
+
+    /**
+     * @notes: 提交订单 支付rmb
+     * @author tongwz
+     * @date: 2019年6月29日15:46:20
+     */
 	public function suborder()
 	{
 		global $_W;
@@ -386,6 +470,12 @@ class Crowd extends CI_Controller
 		}
 		die(json_encode($arr));
 	}
+
+    /**
+     * @notes: 我要报名众筹入口 如果登录的微信号uid等于众筹发起人，那么直接进入当前微信人的众筹详情页
+     * @author tongwz
+     * @date: 2019年6月29日15:01:25
+     */
 	public function unionenter()
 	{
 		global $_W;
@@ -393,6 +483,7 @@ class Crowd extends CI_Controller
 		$crowd_id = $this->input->get("crowd_id");
 		$team_id = $this->input->get("team_id");
 		$rptrow = pdo_get("yhzc_crowd_union", array("crowd_id" => $crowd_id, "user_id" => $_W["member"]["uid"], "uniacid" => $_W["uniacid"]));
+
 		if (!empty($rptrow)) {
 			header("Location:" . appurl("crowd", "uniondetail", "union_id=" . $rptrow["id"]));
 			exit;
@@ -444,6 +535,12 @@ class Crowd extends CI_Controller
 		$data["ckv"] = $ckv;
 		$this->load->view("crowd_union_enter.html", $data);
 	}
+
+    /**
+     * @notes: 提交联合众筹  报名信息
+     * @author tongwz
+     * @date: 2019年6月29日15:09:24
+     */
 	public function subunion()
 	{
 		global $_W;
@@ -477,6 +574,12 @@ class Crowd extends CI_Controller
 			die(json_encode(array("id" => -1, "msg" => "系统错误")));
 		}
 	}
+
+    /**
+     * @notes: 联合众筹详情
+     * @author tongwz 修改
+     * @date: 2019年6月29日14:40:53
+     */
 	public function uniondetail()
 	{
 		global $_W;
@@ -497,6 +600,8 @@ class Crowd extends CI_Controller
 			echo "该众筹项目正在准备中,请稍后再来...";
 			exit;
 		}
+        // 进入众筹详情页 浏览量+1 更新时间 变更
+        pdo_update("yhzc_crowd_union", array("viewnum +=" => 1, 'updatetime' => time()), array("id" => $id));
 		$f_uid = $this->input->get("f_uid");
 		if ($f_uid > 0 && $_W["member"]["uid"] != $f_uid && !isset($_SESSION["union_" . $union["crowd_id"] . "_f_uid"])) {
 			$rpttotal = pdo_fetchcolumn("select count(id) from " . tablename("yhzc_crowd_union") . " where user_id={$_W["member"]["uid"]} and crowd_id={$crowd["id"]} and uniacid={$_W["uniacid"]}");

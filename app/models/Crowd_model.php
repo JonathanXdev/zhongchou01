@@ -507,16 +507,18 @@ class Crowd_model extends CI_Model {
         $summary=$this->input->post('summary');
         $team_id=$this->input->post('team_id');
         $theme=$this->input->post('theme');
-        $production = $this->input->post('production');
-        if (!empty($production)){
-            foreach ($production as $key => $val) {
-                if ($val['img'] == false) {
-                    unset($production[$key]);
-                }
-            }
-        } else {
-            die(json_encode(array('id'=>-1,'msg'=>'请上传您的作品')));
+        $img = $this->input->post('img');
+        $check = array_filter($img);
+        if (empty($check)) die(json_encode(array('id'=>-1,'msg'=>'请上传您的作品')));
+        $describe = $this->input->post('describe');
+        $production = [];
+        foreach ($img as $key => $val) {
+            $production[] = [
+                'img' => $val,
+                'describe' => isset($describe[$key]) ? $describe[$key] : '',
+            ];
         }
+
         $experience = $this->input->post('experience');
         if (!empty($experience)) {
             $experience = array_filter($experience);

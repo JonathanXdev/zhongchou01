@@ -612,6 +612,37 @@ class Crowd extends CI_Controller
 		$data = array("title" => ($union["nickname"] == '' ? "用户" : $union["nickname"]) . "的众筹|" . $crowd["title"], "description" => "完美众筹", "keywords" => "完美众筹", "pagename" => "home", "styles" => ["pages/crowd"], "scripts" => [], "_share" => array("title" => ($union["nickname"] == '' ? "用户" : $union["nickname"]) . "求支持：" . $crowd["title"], "imgUrl" => $union["avatar"], "desc" => $union["summary"], "link" => add_para(add_para(appurl("crowd", "uniondetail", "union_id=" . $id), "team_id", $union["team_id"]), "f_uid", $_W["member"]["uid"])), "crowd" => $crowd, "union" => $union);
 		$this->load->view("crowd_union_detail.html", $data);
 	}
+
+    /**
+     * @notes: 众筹个人详情页 接口
+     * @author tongwz
+     * @date: 2019年6月29日21:06:17
+     */
+    public function unionUserInfo()
+    {
+        global $_W;
+        $id = $this->input->get("union_id");
+        // 获取联合众筹个人信息
+        $union = $this->crowd_model->getcrowd_union_row($id);
+        if (empty($union)) {
+            die(json_encode(['code' => 0, 'msg' => '参数错误']));
+        }
+        if ($union["status"] != "1" && $union["user_id"] != $_W["member"]["uid"]) {
+            die(json_encode(['code' => 0, 'msg' => '该用户报名待审核...']));
+        }
+        // 获取众筹信息
+        $crowd = $this->crowd_model->getcrowd_row($union["crowd_id"]);
+        if (empty($crowd)) {
+            die(json_encode(['code' => 0, 'msg' => '无法找到众筹信息']));
+        }
+        $isSelf = $union['user_id'] == $_W['member']['uid'] ? 1 : 0;
+        $data = [
+            'unoin' => $union,
+            'crowd' => $crowd,
+            'isSelf' => $isSelf,
+        ];
+        die(json_encode(['code' => 1, 'msg' => 'success', 'data' => $data]));
+    }
 	public function unionsummary()
 	{
 		global $_W;
